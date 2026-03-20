@@ -1,0 +1,3055 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>交易机器人监控</title>
+
+<style>
+    /*
+    ========================================================
+    === 1. 全局配置与科技感主题样式 (CSS 保持不变) =========
+    ========================================================
+    */
+    :root {
+        --bg-color: #0c1015; 
+        --panel-bg: #101419; 
+        --accent-blue: #00d4ffff; 
+        --accent-glow: 0 0 10px rgba(0, 212, 255, 0.6); 
+        --border-color: #2a3a50; 
+        --hover-bg: #1c2a38;
+        --extreme-red: #ff4500; 
+        --extreme-green: #39ff14; 
+        --positive-color: var(--extreme-green);
+        --negative-color: var(--extreme-red);
+        --highlight-yellow: #fffb00;
+        --sidebar-bg-alpha: rgba(16, 20, 25, 0.98); 
+        --sidebar-border-color: #00d4ff; 
+        --sidebar-detail-bg: #151a21;
+    }
+
+    @-webkit-keyframes extremePulse {
+        0% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
+        50% { box-shadow: 0 0 15px var(--extreme-red), 0 0 20px var(--extreme-red); }
+        100% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
+    }
+    @keyframes extremePulse {
+        0% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
+        50% { box-shadow: 0 0 15px var(--extreme-red), 0 0 20px var(--extreme-red); }
+        100% { box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
+    }
+
+    body {
+        background: var(--bg-color);
+        color: #e6edf3;
+        font-family: 'Consolas', 'Courier New', monospace; 
+        margin: 0;
+        padding: 40px;
+        transition: background 0.5s;
+        background-image: radial-gradient(circle at 50% 100%, rgba(0,0,0,0.4) 0%, transparent 70%);
+    }
+
+    #cyberClock {
+        position: fixed;
+        top: 30px; 
+        right: 40px;
+        font-size: 1.1em; 
+        font-weight: 700;
+        letter-spacing: 1px;
+        color: var(--accent-blue);
+        text-shadow: 0 0 8px rgba(0, 212, 255, 0.8); 
+        padding: 10px 18px; 
+        border: 2px solid var(--accent-blue);
+        background-color: rgba(0, 0, 0, 0.5); 
+        border-radius: 2px;
+        box-shadow: 0 0 15px rgba(0, 212, 255, 0.5); 
+        display: flex; 
+        align-items: center;
+        z-index: 100;
+    }
+    #cyberClock .separator { color: #e6edf3; margin: 0 15px; font-size: 1.2em; opacity: 0.8; }
+    #cyberClock .time-part { font-size: 1.3em; font-weight: 900; color: #fff; }
+
+    h2 {
+        color: var(--accent-blue);
+        margin-bottom: 30px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 10px;
+        transition: text-shadow 0.8s ease-out, opacity 0.8s ease-out;
+        overflow: visible; 
+        white-space: normal; 
+        width: auto;
+        border-right: none;
+        animation: none;
+    }
+    
+    #dataPanel {
+        background: var(--panel-bg);
+        padding: 20px; 
+        border: 1px solid var(--border-color);
+        border-radius: 8px; 
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(42, 58, 80, 0.1), 0 0 10px rgba(0, 212, 255, 0.05); 
+        transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); 
+    }
+
+    /* Tab Styles */
+    .tab-nav { display: flex; border-bottom: 2px solid var(--border-color); margin-bottom: 20px; padding-left: 0; list-style: none; }
+    .tab-nav-item { margin-right: 25px; padding: 10px 0; cursor: pointer; font-size: 1.1em; font-weight: 600; color: #a0aec0; transition: all 0.3s; border-bottom: 3px solid transparent; letter-spacing: 1px; }
+    .tab-nav-item.active { color: var(--accent-blue); border-bottom: 3px solid var(--accent-blue); text-shadow: 0 0 5px rgba(0, 212, 255, 0.5); }
+    .tab-pane { display: none; padding-top: 5px; min-height: 400px; position: relative; }
+    .tab-pane.active { display: flex; width: 100%; }
+    .score-pane-content { flex-grow: 1; min-width: 0; max-width: 100%; overflow-x: auto; }
+
+    /* Control Bar & Filters */
+    #controlBar { display: flex; align-items: center; margin-bottom: 20px; padding: 10px 0; border-bottom: 1px dashed var(--border-color); width: 100%; }
+    #controlBar span { color: #a0aec0; font-size: 1em; margin-right: 20px; }
+    .filter-button-group { display: inline-flex; border: 1px solid var(--accent-blue); border-radius: 4px; overflow: hidden; box-shadow: var(--accent-glow); }
+    .filter-btn { background: var(--panel-bg); color: var(--accent-blue); border: none; padding: 8px 15px; cursor: pointer; font-family: 'Consolas', monospace; font-weight: 600; font-size: 13px; transition: all 0.2s ease-in-out; }
+    .filter-btn:not(:last-child) { border-right: 1px solid var(--accent-blue); }
+    .filter-btn:hover { background: var(--hover-bg); color: #fff; }
+    .filter-btn.active { background: var(--accent-blue); color: var(--bg-color); text-shadow: none; box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5); font-weight: 700; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; border: none; }
+    th { background: #161b22; padding: 10px 12px; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 10; text-align: left; color: var(--accent-blue); text-transform: uppercase; font-weight: 600; }
+    td { padding: 6px 12px; border-bottom: 1px solid #161b22; white-space: nowrap; vertical-align: top; transition: background 0.1s; color: #e6edf3; }
+    tr:hover { background: var(--hover-bg); box-shadow: inset 3px 0 0 var(--accent-blue); }
+
+    /* PNL Colors */
+    .pnl-positive { color: var(--positive-color); font-weight: bold; text-shadow: 0 0 5px rgba(57, 255, 20, 0.3); }
+    .pnl-negative { color: var(--negative-color); font-weight: bold; text-shadow: 0 0 5px rgba(255, 69, 0, 0.3); }
+    .status-success { color: var(--positive-color); font-weight: bold; }
+    .status-failure { color: var(--negative-color); font-weight: bold; }
+
+    /* Score Cells */
+    .score-seq-cell { border-left: 1px dashed #36465d; white-space: normal; }
+    .score-seq-cell span { display: inline-block; padding: 4px 10px; margin-right: 6px; margin-bottom: 4px; border-radius: 2px; font-weight: 700; font-size: 13px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5); transition: box-shadow 0.1s, border 0.3s; cursor: pointer; position: relative; overflow: visible; vertical-align: middle; }
+    .score-seq-cell span:hover { box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+    .score-positive { background: linear-gradient(135deg, #0f5132, #189e47); color: #90ee90; border: 1px solid #189e47; }
+    .score-negative { background: linear-gradient(135deg, #6e1a1a, #b33a3a); color: #ffb6c1; border: 1px solid #b33a3a; }
+    .score-neutral { background: #2a3a50; color: #a0aec0; border: 1px solid #36465d; }
+    .score-extreme-glow { -webkit-animation: extremePulse 1.5s infinite alternate; animation: extremePulse 1.5s infinite alternate; }
+    .count-box { background: var(--accent-blue); padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; color: var(--bg-color); box-shadow: var(--accent-glow); display: inline-block; min-width: 30px; transition: all 0.3s; text-align: center; }
+    .count-dim { background: #36465d !important; color: #8b949e !important; box-shadow: none !important; border: 1px solid #36465d; }
+
+    /* Sidebar */
+    #scoreDetailsSidebar {
+        width: 0; min-width: 0; height: 100vh; background: var(--sidebar-bg-alpha); position: fixed; right: 0; top: 0; z-index: 1000; overflow-x: hidden; overflow-y: auto; padding: 0; display: flex; flex-direction: column;
+        transform: translateX(100%); 
+        transition: width 0.5s cubic-bezier(0.7, 0, 0.3, 1), min-width 0.5s cubic-bezier(0.7, 0, 0.3, 1), transform 0.5s cubic-bezier(0.7, 0, 0.3, 1);
+        border-left: 2px solid var(--sidebar-border-color); 
+        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 212, 255, 0.5); 
+    }
+    #scoreDetailsSidebar.active { width: 1000px; min-width: 1000px; padding: 20px; transform: translateX(0); }
+    #sidebarHeader { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px; }
+    #sidebarHeader h3 { color: var(--accent-blue); margin: 0; font-size: 1.3em; text-shadow: 0 0 5px rgba(0, 212, 255, 0.5); }
+    #closeSidebar { background: none; border: none; color: #e6edf3; font-size: 1.5em; cursor: pointer; transition: color 0.2s; }
+    #closeSidebar:hover { color: var(--negative-color); }
+    .detail-section {
+        margin-bottom: 20px;
+        padding: 15px;
+        background: var(--sidebar-detail-bg); 
+        border: 1px solid #2a3a50; /* <--- 修改: 使用更柔和的边框颜色（--border-color） */
+        border-radius: 4px;
+        box-shadow: none; /* <--- 修改: 移除光晕效果 */
+    }
+    .detail-section h4 {
+        color: #90d3ff; /* 柔和的淡蓝色 */
+        margin-top: 0;
+        border-bottom: 1px dashed #36465d; /* 细虚线，使用深色边框弱化 */
+        padding-bottom: 5px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        /* text-shadow 已移除 */
+        margin-bottom: 10px; 
+    }
+    .detail-section pre { white-space: pre-wrap; word-wrap: break-word; font-size: 0.9em; color: #90d3ff; margin: 0; line-height: 1.4; }
+    .invalid-row td { text-decoration: line-through; opacity: 0.6; }
+    /* Detail Table */
+    #detailPeriodsDataTableContainer { overflow-x: auto; max-width: 100%; }
+    #detailPeriodsTable { width: 100%; min-width: 800px; border-collapse: collapse; font-size: 0.85em; color: #e6edf3; table-layout: auto; }
+    #detailPeriodsTable th, #detailPeriodsTable td { padding: 10px 8px; border: 1px solid #2a3a50; text-align: left; white-space: normal; word-break: break-all; vertical-align: top; }
+    #detailPeriodsTable th { background: #1c232e; color: var(--accent-blue); font-weight: 600; text-transform: uppercase; position: sticky; top: 0; z-index: 1; }
+    #detailPeriodsTable tr:nth-child(even) { background: #11151a; }
+    #detailPeriodsTable td.numeric { font-family: 'Consolas', monospace; text-align: right; color: #fff; }
+    #detailPeriodsTable td.valid-true { color: var(--positive-color); }
+    #detailPeriodsTable td.valid-false { color: var(--negative-color); }
+    #detailPeriodsTable td e { color: #90d3ff; }
+    #detailPeriodsTable td.numeric.r-highlight { 
+        color: #fffb00ff; /* <--- 修改: 使用更深的紫色 */
+        font-weight: 1200; 
+        /* <--- 修改: 调整光晕，使其更亮更扩散 */
+        text-shadow: 0 0 8px rgba(211, 208, 8, 1), 0 0 14px rgba(204, 207, 9, 0.7); 
+    }
+    /* 买卖量 / 持仓 列：整体突出显示 */
+
+
+
+    /* 多周期表：价格 / 买卖量 / 持仓 三列正负高亮 */
+    #detailPeriodsTable td.value-band-pos-1 {
+        background: radial-gradient(circle at 100% 100%, rgba(1, 245, 34, 0.3), transparent 70%);
+    }
+    #detailPeriodsTable td.value-band-pos-2 {
+        background: radial-gradient(circle at 100% 100%, rgba(1, 245, 34, 0.5), transparent 70%);
+    }
+    #detailPeriodsTable td.value-band-pos-3 {
+        background: radial-gradient(circle at 100% 100%, rgba(1, 245, 34, 0.8), transparent 70%);
+    }
+    #detailPeriodsTable td.value-band-pos-4 {
+        background: radial-gradient(circle at 100% 100%, rgba(0, 255, 34, 1), transparent 70%);
+    }
+
+    #detailPeriodsTable td.value-band-neg-1 {
+        background: radial-gradient(circle at 100% 100%, rgba(253, 2, 2, 0.3), transparent 70%);
+    }
+    #detailPeriodsTable td.value-band-neg-2 {
+        background: radial-gradient(circle at 100% 100%, rgba(253, 2, 2, 0.5), transparent 70%);
+    }
+    #detailPeriodsTable td.value-band-neg-3 {
+        background: radial-gradient(circle at 100% 100%, rgba(253, 2, 2, 0.8), transparent 70%);
+    }
+    #detailPeriodsTable td.value-band-neg-4 {
+        background: radial-gradient(circle at 100% 100%, rgba(253, 2, 2, 1), transparent 70%);
+    }
+
+    /* 悬浮在这两列时再稍微亮一点 */
+    #detailPeriodsTable td.flow-col:hover {
+        background: radial-gradient(circle at 50% 50%, rgba(0, 212, 255, 0.18), transparent 70%);
+    }
+
+
+
+    #detailPeriodsTable td.numeric.fund-effect-neg {
+        color: rgba(25, 243, 18, 1); /* 偏亮的红粉色 */
+        font-weight: 900;
+        text-shadow: 0 0 8px rgba(9, 194, 65, 1),
+                    0 0 15px rgba(15, 211, 48, 0.7);
+    }
+
+
+    /* 24h 异动评分中：最新一次评分所在行高亮 */
+    #scoreTable tbody tr.latest-score-row {
+        position: relative;
+        background: radial-gradient(circle at 0% 0%, rgba(0, 212, 255, 0.12), transparent 60%);
+        box-shadow:
+            inset 0 0 0 1px rgba(0, 212, 255, 0.6),
+            0 0 12px rgba(0, 212, 255, 0.4);
+    }
+
+    /* 从实时持仓跳转到 24h 异动评分时，目标行的强高亮样式 */
+    #scoreTable tbody tr.score-row-highlight {
+        position: relative;
+        background: radial-gradient(circle at 0% 0%, rgba(255, 251, 0, 0.15), transparent 65%);
+        box-shadow:
+            inset 0 0 0 2px var(--highlight-yellow),
+            0 0 18px rgba(255, 251, 0, 0.6);
+    }
+
+    /* 24h 异动评分：最新一批评分所在行高亮 */
+    #scoreTable tbody tr.latest-row {
+        background-color: rgba(0, 212, 255, 0.10);
+        box-shadow: inset 0 0 0 1px rgba(0, 212, 255, 0.6);
+    }
+
+
+    #scoreTable tbody tr.latest-score-row:hover {
+        /* 保留你原来的 hover 逻辑，同时稍微再亮一点 */
+        background: radial-gradient(circle at 0% 0%, rgba(0, 212, 255, 0.18), transparent 60%);
+    }
+
+    /* --- 新增：行/列突出显示 --- */
+    #detailPeriodsTable tr:hover {
+        background: #182029 !important; /* 更深的背景，确保覆盖偶数行颜色 */
+        box-shadow: inset 0 0 0 2px var(--accent-blue); /* 增加一个蓝色边框 */
+    }
+
+    #detailPeriodsTable td:hover {
+        background: var(--accent-blue) !important; /* 单元格使用主题亮色 */
+        color: var(--bg-color); /* 文本反色，增强对比 */
+        font-weight: 900; /* 加粗 */
+        text-shadow: none;
+        box-shadow: 0 0 15px var(--accent-blue); /* 强烈的蓝色光晕 */
+    }
+
+    /* =======================================================
+    实时持仓表 #positionsTable 专用样式
+    ======================================================= */
+
+    #positionsTable {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: auto;
+        border: none;
+    }
+
+    /* 表头 */
+    #positionsTable thead th {
+        background: #161b22;
+        padding: 8px 10px;
+        border-bottom: 1px solid #2a3a50;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        text-align: left;
+        color: var(--accent-blue);
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        font-size: 12px;
+    }
+
+    /* 表体单元格：整体比默认稍微大一点，但不过分 */
+    #positionsTable tbody td {
+        padding: 8px 12px;
+        border-bottom: 1px solid #161b22;
+        white-space: nowrap;
+        vertical-align: middle;
+        color: #e6edf3;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 14px;
+    }
+
+
+    /* 行 hover 效果 */
+    #positionsTable tbody tr:hover {
+        background: #151a1f;
+        box-shadow: inset 3px 0 0 var(--accent-blue);
+    }
+
+    /* 竖线分组：某些列右边加竖线 */
+    #positionsTable th.group-right,
+    #positionsTable td.group-right {
+        border-right: 2px solid #2a3a50;
+    }
+
+    /* ===== 列宽与权重 ===== */
+
+    /* 序号 */
+    #positionsTable th.pos-index-col,
+    #positionsTable td.pos-index-col {
+        width: 50px;
+        text-align: center;
+        font-size: 12px;
+        color: #9ba3b0;
+    }
+
+    /* SYMBOL / 方向：关键列，字体更大一点 */
+    #positionsTable th.pos-key-col,
+    #positionsTable td.pos-key-col {
+        width: 110px;
+        font-size: 15px;
+        font-weight: 700;
+    }
+
+    /* 名义价值 */
+    #positionsTable th.pos-value-col,
+    #positionsTable td.pos-value-col {
+        width: 50px;
+        font-size: 14px;
+    }
+
+    /* 浮动盈亏 */
+    #positionsTable th.pos-pnl-col,
+    #positionsTable td.pos-pnl-col {
+        width: 140px;
+        font-size: 14px;
+    }
+
+    /* 持仓时长：稍窄，弱化一点 */
+    #positionsTable th.pos-time-col,
+    #positionsTable td.pos-time-col {
+        width: 90px;
+        font-size: 12px;
+        color: #9ba3b0;
+    }
+
+    /* 评分历史：允许多一点宽度，避免溢出卡片 */
+    #positionsTable th.pos-score-col,
+    #positionsTable td.pos-score-col {
+        min-width: 160px;
+        max-width: 260px;
+        white-space: normal;
+        word-wrap: break-word;
+        line-height: 1.4;
+        font-size: 13px;
+        color: #9fb3c8;
+    }
+    /* 通用均线列 */
+    #positionsTable th.pos-ma-col,
+    #positionsTable td.pos-ma-col {
+        min-width: 80px;
+        font-size: 12px;
+        color: #90d3ff;
+        white-space: normal;
+        line-height: 1.3;
+    }
+
+    #positionsTable th.pos-ma-struct-col,
+    #positionsTable td.pos-ma-struct-col {
+        min-width: 260px;
+        max-width: 500px;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow: visible;
+        text-overflow: clip;
+        line-height: 1.4;
+        font-size: 13px;
+        color: #cbd5f5;
+    }
+
+
+    #positionsTable td.pos-ma-col {
+        white-space: normal;
+        line-height: 1.3;
+    }
+    #positionsTable .ma-status-tag {
+        display: inline-block;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 11px;
+        border: 1px solid #36465d;
+        background: #151a1f;
+        color: #cbd5f5;
+    }
+    #positionsTable .ma-status-zhendang {
+        border-color: #fffb00;
+        color: #fffb00;
+        box-shadow: 0 0 8px rgba(255, 251, 0, 0.6);
+    }
+    #positionsTable .ma-slope-line {
+        display: block;
+        margin-top: 2px;
+        font-size: 12px;
+        opacity: 0.75;
+        color: #9fb3c8; /* 或沿用你弱化色系 */
+    }
+
+    /* 均线结构里高亮 close */
+    #positionsTable .ma-close-highlight {
+        color: #ffd700;      /* 金黄色 */
+        font-weight: 600;
+    }
+    #positionsTable .ma-slope-k {
+        color: #e96a02ff;
+        font-weight: 600;
+    }
+
+
+    /* 操作列 */
+    #positionsTable th.pos-op-col,
+    #positionsTable td.pos-op-col {
+        width: 90px;
+        text-align: center;
+        font-size: 12px;
+    }
+    /* 实时持仓中的手动平仓按钮 */
+    .pos-close-btn {
+        padding: 4px 8px;
+        border-radius: 4px;
+        border: 1px solid rgba(255, 107, 129, 0.9);
+        background: rgba(175, 64, 64, 0.6);
+        color: #ffeef0;
+        font-size: 11px;
+        cursor: pointer;
+        font-family: 'Consolas', 'Courier New', monospace;
+        transition: all 0.15s ease-in-out;
+    }
+
+    .pos-close-btn:hover {
+        background: rgba(201, 80, 98, 0.65);
+        box-shadow: 0 0 10px rgba(224, 72, 95, 0.8);
+    }
+    .pos-close-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    /* ===== 多空底色（复用和交易记录一样的语义） ===== */
+
+    #positionsTable td.long-pos {
+        background: rgba(15, 81, 50, 0.45);   /* 多单绿色 */
+        box-shadow: inset 0 0 6px rgba(0, 255, 150, 0.4);
+    }
+
+    #positionsTable td.short-pos {
+        background: rgba(110, 26, 26, 0.45);  /* 空单红色 */
+        box-shadow: inset 0 0 6px rgba(255, 80, 80, 0.4);
+    }
+
+    /* ===== 盈亏颜色 ===== */
+
+    #positionsTable .pnl-positive {
+        color: var(--positive-color);
+        font-weight: bold;
+        text-shadow: 0 0 5px rgba(57, 255, 20, 0.3);
+    }
+
+    #positionsTable .pnl-negative {
+        color: var(--negative-color);
+        font-weight: bold;
+        text-shadow: 0 0 5px rgba(255, 69, 0, 0.3);
+    }
+
+    /* ===== 评分历史胶囊（可选） ===== */
+
+    #positionsTable td.pos-score-col .score-pill {
+        display: inline-block;
+        padding: 2px 6px;
+        margin: 2px 3px 0 0;
+        border-radius: 3px;
+        font-size: 11px;
+        background: #1b2330;
+        color: #cbd5f5;
+        box-shadow: 0 0 6px rgba(0, 212, 255, 0.4);
+    }
+    #positionsTable td.pos-score-history {
+    font-size: 13px;
+    color: #90d3ff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* 太长自动 ... */
+    }
+
+    /* 自选 OI：变化超过 1% 高亮 */
+    #oiwatchTable tbody tr.oiwatch-hot {
+    background: radial-gradient(circle at 0% 0%, rgba(255, 251, 0, 0.14), transparent 65%);
+    box-shadow: inset 0 0 0 1px rgba(255, 251, 0, 0.65);
+    }
+
+    /* 子系列按钮风格 */
+    .oiwatch-tab {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 212, 255, 0.25);
+    background: rgba(10, 15, 20, 0.6);
+    color: #cbd5f5;
+    cursor: pointer;
+    }
+    .oiwatch-tab.active {
+    border-color: rgba(0, 212, 255, 0.7);
+    box-shadow: 0 0 12px rgba(0, 212, 255, 0.35);
+    }
+    .oiwatch-remove {
+    margin-left: 6px;
+    opacity: .75;
+    cursor: pointer;
+    }
+    .oiwatch-remove:hover { opacity: 1; }
+
+    /* ===== 实时持仓概览卡片 ===== */
+    #positions-summary-card {
+        margin-bottom: 18px;
+        padding: 14px 18px;
+        border-radius: 8px;
+        background:
+            radial-gradient(circle at 0% 0%, rgba(0, 212, 255, 0.12), transparent 55%),
+            radial-gradient(circle at 100% 100%, rgba(57, 255, 20, 0.10), transparent 55%),
+            #0c1015;
+        border: 1px solid rgba(0, 212, 255, 0.5);
+        box-shadow:
+            0 0 18px rgba(0, 212, 255, 0.35),
+            0 0 40px rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        font-size: 13px;
+    }
+
+    .positions-summary-left {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .positions-summary-title {
+        font-size: 16px;
+        letter-spacing: 5px;
+        color: var(--accent-blue);
+        text-transform: uppercase;
+        opacity: 0.9;
+    }
+
+    .positions-summary-sub {
+        font-size: 11px;
+        color: #8b949e;
+        opacity: 0.85;
+    }
+
+    .positions-summary-right {
+        display: flex;
+        gap: 22px;
+        align-items: center;
+        transform: translateX(-199px);  /* 想再靠中一点可以调成 -60 或 -80 */
+    }
+
+    .summary-metric {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        min-width: 120px;
+    }
+
+    .summary-label {
+        font-size: 11px;
+        color: #8b949e;
+        margin-bottom: 2px;
+    }
+
+    .summary-value {
+        font-size: 14px;
+        font-weight: 700;
+        font-family: 'Consolas', 'Courier New', monospace;
+    }
+
+    /* 数字颜色：使用原有 pnl-positive / pnl-negative / 中性色 */
+    .summary-value-neutral {
+        color: #e6edf3;
+    }
+
+    .summary-value-strong {
+        text-shadow: 0 0 6px rgba(0, 212, 255, 0.65);
+    }
+
+
+
+    /* 默认中性色 */
+    .summary-value-neutral {
+        color: #e6edf3;
+    }
+
+    /* 总浮动盈亏稍微再大一点，做主角 */
+    #total-upnl.summary-value {
+        font-size: 22px;
+        letter-spacing: 0.5px;
+    }
+
+    /* 正/负时 JS 会加 pnl-positive / pnl-negative，再叠这个高亮类 */
+    .summary-value-strong {
+        text-shadow:
+            0 0 8px rgba(0, 212, 255, 0.85),
+            0 0 18px rgba(0, 212, 255, 0.5);
+    }
+
+    /* ===========================
+    黑名单管理卡片
+    =========================== */
+
+    #blacklist-card {
+        margin-top: 18px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        background:
+            radial-gradient(circle at 0% 0%, rgba(255, 196, 0, 0.10), transparent 55%),
+            radial-gradient(circle at 100% 100%, rgba(0, 212, 255, 0.05), transparent 55%),
+            #0c1015;
+        border: 1px solid rgba(255, 196, 0, 0.6);
+        box-shadow:
+            0 0 14px rgba(255, 196, 0, 0.35),
+            0 0 28px rgba(0, 0, 0, 0.9);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        font-size: 13px;
+    }
+
+    .blacklist-header {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .blacklist-title {
+        font-size: 12px;
+        letter-spacing: 2px;
+        color: var(--highlight-yellow);
+        text-transform: uppercase;
+    }
+
+    .blacklist-sub {
+        font-size: 11px;
+        color: #8b949e;
+        opacity: 0.85;
+    }
+
+    .blacklist-body {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    /* 左侧：当前黑名单列表 */
+    .blacklist-items {
+        flex: 1;
+        min-height: 28px;
+    }
+
+    .blacklist-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 8px;
+        margin: 2px 6px 2px 0;
+        border-radius: 999px;
+        background: rgba(255, 196, 0, 0.06);
+        border: 1px solid rgba(255, 196, 0, 0.8);
+        font-size: 12px;
+        color: #ffeaa7;
+        box-shadow: 0 0 8px rgba(255, 196, 0, 0.5);
+    }
+
+    .blacklist-chip-symbol {
+        margin-right: 6px;
+        font-weight: 700;
+    }
+
+    .blacklist-chip-remove {
+        cursor: pointer;
+        font-size: 12px;
+        opacity: 0.8;
+        padding: 0 2px;
+    }
+
+    .blacklist-chip-remove:hover {
+        opacity: 1;
+        color: var(--negative-color);
+    }
+
+    /* 右侧：输入 + 添加按钮 */
+    .blacklist-add {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    #blacklist-input {
+        height: 28px;
+        padding: 4px 8px;
+        border-radius: 4px;
+        border: 1px solid var(--border-color);
+        background: #0f1318;
+        color: #e6edf3;
+        font-family: 'Consolas', 'Courier New', monospace;
+        font-size: 12px;
+        min-width: 140px;
+    }
+
+    #blacklist-input::placeholder {
+        color: #6b7280;
+        font-size: 11px;
+    }
+
+    #blacklist-add-btn {
+        height: 28px;
+        padding: 0 10px;
+        border-radius: 4px;
+        border: 1px solid rgba(255, 196, 0, 0.9);
+        background: linear-gradient(135deg, rgba(250, 196, 18, 0.9),rgba(243, 192, 26, 0.4));
+        color: #fcfcfcff;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 0 10px rgba(255, 196, 0, 0.6);
+    }
+
+    #blacklist-add-btn:hover {
+        filter: brightness(1.1);
+    }
+
+    /* =======================================================
+    1m 持仓异动表 #oi1mTable
+    ======================================================= */
+
+    #oi1m-controlBar {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+        padding: 6px 0;
+        border-bottom: 1px dashed var(--border-color);
+        font-size: 12px;
+        color: #a0aec0;
+    }
+
+    #oi1mTable {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        font-size: 13px;
+        border: none;
+    }
+
+    #oi1mTable thead th {
+        background: #161b22;
+        padding: 8px 10px;
+        border-bottom: 1px solid #2a3a50;
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        text-align: left;
+        color: var(--accent-blue);
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    #oi1mTable tbody td {
+        padding: 6px 10px;
+        border-bottom: 1px solid #161b22;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        vertical-align: middle;
+        color: #e6edf3;
+    }
+
+    #oi1mTable tbody tr:hover {
+        background: #151a1f;
+        box-shadow: inset 3px 0 0 var(--accent-blue);
+    }
+    #oi1mTable th.oi1m-col-alert,
+    #oi1mTable td.oi1m-col-alert {
+        width: 70px;
+        text-align: center;
+        font-size: 12px;
+        color: #a0aec0;
+    }
+
+    /* 列宽大致分配 */
+    #oi1mTable th.oi1m-col-time,
+    #oi1mTable td.oi1m-col-time {
+        width: 120px;
+        font-size: 12px;
+        color: #9ba3b0;
+    }
+
+    #oi1mTable th.oi1m-col-symbol,
+    #oi1mTable td.oi1m-col-symbol {
+        width: 90px;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    /* 核心数值列：稍微强调 */
+    #oi1mTable th.oi1m-col-strong,
+    #oi1mTable td.oi1m-col-strong {
+        width: 90px;
+        font-size: 13px;
+    }
+
+    /* 解读列：拉长一点 */
+    #oi1mTable th.oi1m-col-text,
+    #oi1mTable td.oi1m-col-text {
+        min-width: 220px;
+        font-size: 12px;
+        white-space: normal;
+    }
+
+    /* 后四列弱化 */
+    #oi1mTable th.oi1m-col-weak,
+    #oi1mTable td.oi1m-col-weak {
+        width: 90px;
+        font-size: 12px;
+        color: #8b949e;
+        opacity: 0.85;
+    }
+
+    /* 1m 强烈异动高亮样式 */
+    #oi1mTable td.oi1m-strong-highlight {
+        font-weight: 700;
+        text-shadow: 0 0 8px rgba(56, 189, 248, 0.8); /* 蓝色光晕，和主题一致 */
+    }
+
+    /* 正负颜色已有 oi1m-pos / oi1m-neg，不需要再额外处理 */
+
+    /* 正负高亮：复用 pnl-positive / pnl-negative 也可以 */
+    #oi1mTable td.oi1m-pos {
+        color: var(--positive-color);
+        font-weight: 600;
+    }
+
+    #oi1mTable td.oi1m-neg {
+        color: var(--negative-color);
+        font-weight: 600;
+    }
+
+    /* 可点击的 symbol */
+    #oi1mTable td.oi1m-col-symbol {
+        cursor: pointer;
+        color: var(--accent-blue);
+    }
+    #oi1mTable td.oi1m-col-symbol:hover {
+        text-decoration: underline;
+    }
+
+    /* =======================================================
+    交易记录表 #tradesTable 专用样式
+    ======================================================= */
+    /* ===== 交易记录汇总卡片 ===== */
+    #trades-summary-card {
+        margin-bottom: 14px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        background:
+            radial-gradient(circle at 0% 0%, rgba(0, 212, 255, 0.12), transparent 55%),
+            radial-gradient(circle at 100% 100%, rgba(57, 255, 20, 0.10), transparent 55%),
+            #0c1015;
+        border: 1px solid rgba(0, 212, 255, 0.45);
+        box-shadow:
+            0 0 14px rgba(0, 212, 255, 0.28),
+            0 0 32px rgba(0, 0, 0, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 20px;
+        font-size: 13px;
+    }
+
+    .trades-summary-left {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .trades-summary-title {
+        font-size: 12px;
+        letter-spacing: 1px;
+        color: var(--accent-blue);
+        text-transform: uppercase;
+        opacity: 0.9;
+    }
+
+    .trades-summary-sub {
+        font-size: 11px;
+        color: #8b949e;
+        opacity: 0.85;
+    }
+
+    .trades-summary-right {
+        flex: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .trades-summary-text {
+        font-size: 13px;
+        color: #a0aec0;
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    /* 让汇总文本在窄屏时自动换行也 OK，可以加上这句（可选） */
+    /*
+    .trades-summary-text {
+        white-space: normal;
+    }
+    */
+    --------------------
+    /* 整个表格基础样式 */
+    #tradesTable {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        table-layout: fixed;
+        border: none;
+    }
+
+    /* 表头 */
+    #tradesTable thead th {
+        background: #161b22;
+        padding: 8px 10px;
+        border-bottom: 1px solid #2a3a50;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        text-align: left;
+        color: var(--accent-blue);
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        font-size: 12px;
+    }
+
+    /* 表体单元格 */
+    #tradesTable tbody td {
+        padding: 6px 10px;
+        border-bottom: 1px solid #161b22;
+        white-space: nowrap;
+        vertical-align: middle;
+        color: #e6edf3;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* 行 hover 效果：左侧蓝色光条 + 背景加深 */
+    #tradesTable tbody tr:hover {
+        background: #151a1f;
+        box-shadow: inset 3px 0 0 var(--accent-blue);
+    }
+
+    /* 竖线分组：在某些列右侧画一条粗一点的竖线 */
+    #tradesTable th.group-right,
+    #tradesTable td.group-right {
+        border-right: 2px solid #2a3a50;
+    }
+
+    /* ========== 列宽与视觉权重 ========== */
+
+    /* 序号列 */
+    #tradesTable th.index-col,
+    #tradesTable td.index-col {
+        width: 40px;
+        text-align: center;
+        font-size: 11px;
+        color: #9ba3b0;
+    }
+
+    /* 时间 / 持仓时长列：窄 + 字体更小 + 弱化 */
+    #tradesTable th.time-col,
+    #tradesTable td.time-col {
+        width: 90px;
+        font-size: 11px;
+        color: #8b949e;
+        font-weight: 400;
+    }
+
+    /* 关键信息列：SYMBOL / 方向 */
+    #tradesTable th.key-col,
+    #tradesTable td.key-col {
+        width: 120px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #e6edf3;
+    }
+
+    /* 状态列 */
+    #tradesTable th.status-col,
+    #tradesTable td.status-col {
+        width: 90px;
+        font-size: 12px;
+        color: #c1c9d4;
+    }
+
+    /* 盈亏列：稍微放大一点，突出金额 */
+    #tradesTable th.pnl-col,
+    #tradesTable td.pnl-col {
+        width: 110px;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    /* 历史评分列：允许多一点宽度 */
+    #tradesTable th.score-col,
+    #tradesTable td.score-col {
+        min-width: 200px;
+        max-width: 260px;
+        white-space: normal;
+        word-wrap: break-word;
+        line-height: 1.4;
+        font-size: 12px;
+        color: #9fb3c8;
+    }
+
+    /* ========== 多空底色（只给 SYMBOL & 方向 两格上色） ========== */
+
+    #tradesTable td.long-pos {
+        background: rgba(15, 81, 50, 0.45);   /* 偏绿，多单 */
+        box-shadow: inset 0 0 6px rgba(0, 255, 150, 0.4);
+    }
+
+    #tradesTable td.short-pos {
+        background: rgba(110, 26, 26, 0.45);  /* 偏红，空单 */
+        box-shadow: inset 0 0 6px rgba(255, 80, 80, 0.4);
+    }
+
+    /* ========== 盈亏颜色（沿用你的全局变量） ========== */
+
+    #tradesTable .pnl-positive {
+        color: var(--positive-color);
+        font-weight: bold;
+        text-shadow: 0 0 5px rgba(57, 255, 20, 0.3);
+    }
+
+    #tradesTable .pnl-negative {
+        color: var(--negative-color);
+        font-weight: bold;
+        text-shadow: 0 0 5px rgba(255, 69, 0, 0.3);
+    }
+
+    /* ========== 历史评分胶囊 ========== */
+
+    #tradesTable td.score-col .score-pill {
+        display: inline-block;
+        padding: 2px 6px;
+        margin: 2px 3px 0 0;
+        border-radius: 3px;
+        font-size: 11px;
+        background: #1b2330;
+        color: #cbd5f5;
+        box-shadow: 0 0 6px rgba(0, 212, 255, 0.4);
+    }
+
+    /* 超长评分行，做一点渐隐效果可选（不需要可以删掉） */
+    #tradesTable td.score-col {
+        position: relative;
+    }
+
+   
+
+
+</style>
+</head>
+
+<body>
+    
+    <div id="cyberClock"></div>
+
+    <h2 id="decryption-title">[ SGINAL SYSTEM ] 交易机器人监控</h2>
+    
+    <div id="dataPanel">
+        <ul class="tab-nav">
+            <li class="tab-nav-item active" data-tab="scores">24h 异动评分</li>
+            <li class="tab-nav-item" data-tab="oi1m">1m 持仓异动</li>
+            <li class="tab-nav-item" data-tab="oiwatch">自选 OI 监控</li>
+            <li class="tab-nav-item" data-tab="positions">实时持仓</li>
+            <li class="tab-nav-item" data-tab="trades">交易记录</li>
+
+        </ul>
+
+        <div class="tab-content">
+            
+            <div id="scores" class="tab-pane active">
+                <div class="score-pane-content">
+                    
+                    <div id="controlBar">
+                        <span></span>
+                        <div id="scoreFilterButtons" class="filter-button-group">
+                            <button class="filter-btn active" data-filter="all">所有合约 (All)</button>
+                            <button class="filter-btn" data-filter="bright">高强度异动 (Bright)</button>
+                            <button class="filter-btn" data-filter="dim">微小波动 (Dim)</button>
+                        </div>
+                    </div>
+                    
+                    <table id="scoreTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 100px;">SYMBOL</th>
+                                <th style="width: 90px; text-align: center;">COUNT</th>
+                                <th>SCORES </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            </tbody>
+                    </table>
+                </div>
+
+                <div id="scoreDetailsSidebar">
+                    <div id="sidebarHeader">
+                        <h3 id="sidebarTitle">评分详情</h3>
+                        <button id="closeSidebar">×</button>
+                    </div>
+                    
+                    <div id="sidebarContent">
+                        
+                        <div class="detail-section">
+                            <h4>操作</h4>
+                            <pre id="detailDecisionMsg">加载中...</pre>
+                        </div>
+
+                        <div class="detail-section">
+                            <h4>📊 数据 (Periods)</h4>
+                            <div id="detailPeriodsDataTableContainer">
+                                正在加载多周期原始数据...
+                            </div>
+                        </div>                        
+                        
+                        <div class="detail-section">
+                            <h4> 解读</h4>
+                            <pre id="detailAiSummary">加载中...</pre>
+                        </div>
+                    
+
+                        </div>
+                </div>
+            </div>
+            <div class="tab-content">
+                <!-- ... 原来的 #scores ... -->
+
+                <!-- ⭐ 新增：1m 持仓异动页面 -->
+                <div id="oi1m" class="tab-pane">
+                    <div style="width: 100%;">
+
+                        <!-- 顶部过滤条 -->
+                        <div id="oi1m-controlBar">
+                            <span id="oi1m-filter-label">全市场：最近 4 小时内的 1m 持仓异动</span>
+                            <button id="oi1m-reset-btn" style="margin-left: 16px; padding: 4px 10px; font-size: 14px; cursor: pointer;background: var(--accent-blue) !important; /* 单元格使用主题亮色 */
+                            color: var(--bg-color);border: none; outline: none; /* 文本反色，增强对比 */
+                            font-weight: 500; /* 加粗 */
+                            text-shadow: none;
+                            box-shadow: 0 0 15px var(--accent-blue); /* 强烈的蓝色光晕 */">
+                                返回全市场 4h 视图
+                            </button>
+                        </div>
+
+                        <table id="oi1mTable">
+                            <thead>
+                                <tr>
+                                    <th class="oi1m-col-time">时间 (UTC)</th>
+                                    <th class="oi1m-col-symbol">SYMBOL</th>
+                                    <th class="oi1m-col-alert">24H提醒</th>
+                                    <th class="oi1m-col-strong">持仓变化</th>
+                                    <th class="oi1m-col-strong">1m 涨幅</th>
+                                    <th class="oi1m-col-strong">成交量变化</th>
+                                    <th class="oi1m-col-strong">买卖比</th>
+                                    <th class="oi1m-col-text">解读</th>
+
+                                    <!-- 后四列：弱化显示 -->
+                                    <th class="oi1m-col-weak">成交额变化</th>
+                                    <th class="oi1m-col-weak">成交额</th>
+                                    <th class="oi1m-col-weak">买入额</th>
+                                    <th class="oi1m-col-weak">卖出额</th>
+                                </tr>
+                            </thead>
+                            <tbody id="oi1m-table-body">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="oiwatch" class="tab-pane">
+                    <div style="width:100%;">
+
+                        <!-- 顶部：添加合约 -->
+                        <div id="oiwatch-controlBar" style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+                        <span style="opacity:.9;">最多 5 个合约，每分钟刷新 OI/价格</span>
+
+                        <input id="oiwatch-symbol-input" placeholder="输入合约，如 BTCUSDT"
+                                style="margin-left:auto; padding:6px 10px; background:#0f141a; border:1px solid rgba(0,212,255,.25); color:#cbd5f5; border-radius:6px; outline:none; width:220px;">
+                        <button id="oiwatch-add-btn"
+                                style="padding:6px 10px; cursor:pointer; background:var(--accent-blue); color:var(--bg-color); border:none; border-radius:6px; box-shadow:0 0 12px rgba(0,212,255,.35);">
+                            添加
+                        </button>
+                        </div>
+
+                        <!-- 子系列：合约切换 -->
+                        <div id="oiwatch-symbol-tabs" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;"></div>
+
+                        <!-- 汇总表 -->
+                        <table id="oiwatchTable">
+                        <thead>
+                            <tr>
+                            <th style="width:120px;">SYMBOL</th>
+                            <th style="width:160px;">OI</th>
+                            <th style="width:120px;">OI Δ%</th>
+                            <th style="width:140px;">PRICE</th>
+                            <th style="width:120px;">1m Δ%</th>
+                            <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="oiwatch-table-body"></tbody>
+                        </table>
+
+                        <!-- 柱状图 -->
+                        <div style="margin-top:14px;">
+                        <div style="opacity:.9; margin-bottom:6px;">OI 柱状图（基线=样本最小 OI，便于对比变化）</div>
+                        <div id="oiwatch-chart" style="height:200px; border:1px solid rgba(0,212,255,.18); border-radius:10px; padding:10px; display:flex; align-items:flex-end; gap:2px; overflow:hidden;"></div>
+                        </div>
+
+                    </div>
+                    </div>
+
+                <!-- 原来的 #positions / #trades 保持不动 -->
+            </div>
+           
+            <div id="positions" class="tab-pane">
+                <div style="width: 100%;">
+
+                    <!-- === 持仓概览 科幻卡片 === -->
+                    <div id="positions-summary-card">
+                        <div class="positions-summary-left">
+                            <div class="positions-summary-title">CURRENT POSITIONS </div>
+
+                        </div>
+
+                        <div class="positions-summary-right">
+                            <div class="summary-metric">
+                                <div class="summary-label">总浮动盈亏</div>
+                                <div id="total-upnl" class="summary-value summary-value-neutral">--</div>
+                            </div>
+
+                            <div class="summary-metric">
+                                <div class="summary-label">当前余额</div>
+                                <div id="wallet-balance" class="summary-value summary-value-neutral">--</div>
+                            </div>
+
+                            <div class="summary-metric">
+                                <div class="summary-label">总权益</div>
+                                <div id="total-equity" class="summary-value summary-value-neutral">--</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- === /持仓概览卡片 === -->
+
+                    <table id="positionsTable">
+                        <thead>
+                            <tr>
+                                <th class="pos-index-col">序号</th>
+                                <th class="pos-key-col group-right">SYMBOL</th>
+                                <th class="pos-key-col">方向</th>
+                                <th class="pos-value-col group-right">价值</th>
+                                <th class="pos-pnl-col">浮动盈亏 (回报率)</th>
+                                <th class="pos-time-col">持仓时长</th>
+                                <th class="pos-score-col group-right">评分历史</th>
+
+                                <th class="pos-ma-struct-col">均线结构</th>
+                                <th class="pos-ma-col">均线状态</th>
+                                <th class="pos-ma-col group-right">金叉/死叉</th>
+                                <th class="pos-op-col">操作</th>  <!-- 新增 -->
+                            </tr>
+                        </thead>
+                        <tbody id="positions-table-body">
+                        </tbody>
+                    </table>
+                    <!-- === 黑名单管理 小卡片 === -->
+                    <div id="blacklist-card">
+                        <div class="blacklist-header">
+                            <div class="blacklist-title">TRADE BLACKLIST</div>
+
+                        </div>
+
+                        <div class="blacklist-body">
+                            <!-- 左侧：当前黑名单 -->
+                            <div id="blacklist-items" class="blacklist-items">
+                                暂无黑名单
+                            </div>
+
+                            <!-- 右侧：添加黑名单 -->
+                            <div class="blacklist-add">
+                                <input id="blacklist-input"
+                                    type="text"
+                                    placeholder="-"
+                                    autocomplete="off" />
+                                <button id="blacklist-add-btn">添加</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- === /黑名单管理 小卡片 === -->
+
+                </div>
+            </div>
+
+
+
+            <div id="trades" class="tab-pane">
+                   <div style="width: 100%;">
+
+                    <!-- === 交易记录汇总 科幻卡片 === -->
+                    <div id="trades-summary-card">
+                        <div class="trades-summary-left">
+                            <div class="trades-summary-title"></div>
+
+                        </div>
+
+                        <div class="trades-summary-right">
+                            <!-- 保持这个 id，JS 里还在用它写“盈利单 / 亏损单 / 实现收益” -->
+                            <div id="tradesSummary" class="trades-summary-text">
+                                汇总: --
+                            </div>
+                        </div>
+                    </div>
+                    <!-- === /交易记录汇总卡片 === -->
+
+
+                    <table id="tradesTable">
+                    <thead>
+                        <tr>
+                        <th class="index-col group-right">#</th>
+
+                        <th class="time-col">开仓时间 (UTC)</th>
+                        <th class="time-col">平仓时间 (UTC)</th>
+                        <th class="time-col group-right">持仓时长</th>
+
+                        <th class="key-col">SYMBOL</th>
+                        <th class="key-col">方向</th>
+                        <th class="status-col group-right">状态</th>
+
+                        <th class="pnl-col group-right">盈亏 (USDT)</th>
+                        <th class="score-col">历史评分</th>
+                        </tr>
+                    </thead>
+                    <tbody id="trades-table-body"></tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // 只保留时间，不显示年月日，例如：'2025-12-03 20:24:04' -> '20:24:04'
+    function timeOnly(str) {
+        if (!str) return '--';
+        // 常见格式：'2025-12-03 20:24:04' 或 '2025-12-03T20:24:04'
+        // 先统一把 T 替换掉
+        const s = str.replace('T', ' ');
+        // 如果长度足够，取最后 8 个字符 'HH:MM:SS'
+        if (s.length >= 8) {
+            return s.slice(-8);
+        }
+        return s;
+    }
+
+    // ========================================================
+    // === 1. 全局变量 (Global Variables) =====================
+    // ========================================================
+    
+    let cachedScoreData = null; // 缓存评分数据，避免 Tab 切换重复调用 API
+    let activeTab = 'scores';   // 当前激活的 Tab 状态
+    let symbolToHighlight = null;   // 从实时持仓跳转时，要高亮的合约
+    let oi1mCurrentSymbol = null;  // null = 全市场
+    let oi1mCurrentHours = 4;      // 默认 4 小时窗口
+    let lastOi1mFetch = 0;
+    let oiwatchSymbols = [];
+    let oiwatchActiveSymbol = null;
+    let lastOiWatchFetch = 0;
+
+    // ========================================================
+    // === 2. 辅助函数 (Utility Functions) ====================
+    // ========================================================
+
+    /**
+     * 更新顶部 UTC 时钟显示
+     */
+    function updateClock() {
+        const now = new Date();
+        const year = String(now.getUTCFullYear());
+        const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(now.getUTCDate()).padStart(2, '0');
+        const hours = String(now.getUTCHours()).padStart(2, '0');
+        const minutes = String(now.getUTCMinutes()).padStart(2, '0');
+        const seconds = String(now.getUTCSeconds()).padStart(2, '0');
+        
+        document.getElementById('cyberClock').innerHTML = 
+            `[ ${year}-${month}-${day} UTC ]<span class="separator">//</span><span class="time-part">${hours}:${minutes}:${seconds}</span>`;
+    }
+    
+    /**
+     * 格式化时间戳为 M-D HH:MM:SS (UTC)
+     * @param {number} ts - 时间戳 (毫秒)
+     */
+    function formatTimeShort(ts) {
+        let d = new Date(ts);
+        let month = String(d.getUTCMonth() + 1).padStart(2, "0");
+        let day   = String(d.getUTCDate()).padStart(2, "0");
+        let hh    = String(d.getUTCHours()).padStart(2, "0");
+        let mm    = String(d.getUTCMinutes()).padStart(2, '0');
+        let ss    = String(d.getUTCSeconds()).padStart(2, '0');
+        return `${month}-${day} ${hh}:${mm}:${ss}`;
+    }
+
+    /**
+     * 根据分数返回 CSS 颜色类
+     * @param {number} score - 评分值
+     */
+    function getColorClass(score) {
+        let classes = [];
+        if (score > 50) classes.push("score-positive");
+        else if (score < -50) classes.push("score-negative");
+        else classes.push("score-neutral");
+        if (Math.abs(score) >= 80) classes.push("score-extreme-glow");
+        return classes.join(' ');
+    }
+    
+    function formatPercent(value, withSign = true) {
+        if (value === null || value === undefined || isNaN(value)) return '--';
+        const num = Number(value);
+        const sign = withSign ? (num > 0 ? '+' : '') : '';
+        return `${sign}${num.toFixed(2)}%`;
+    }
+
+    function formatNumber(value, decimals = 2) {
+        if (value === null || value === undefined || isNaN(value)) return '--';
+        return Number(value).toFixed(decimals);
+    }
+
+    /**
+     * 关闭侧边栏
+     */
+    function closeSidebar() {
+        document.getElementById('scoreDetailsSidebar').classList.remove('active');
+    }
+
+
+    // ========================================================
+    // === 3. 渲染函数 (Rendering Functions) ==================
+    // ========================================================
+
+    /**
+     * 渲染评分详情中的多周期数据表格
+     * @param {object} periodsData - 多周期数据对象
+     */
+    function renderPeriodsTable(periodsData) {
+        const container = document.getElementById('detailPeriodsDataTableContainer');
+        container.innerHTML = ''; 
+    
+        if (!periodsData || Object.keys(periodsData).length === 0) {
+            container.innerHTML = '<pre>无多周期数据。</pre>';
+            return;
+        }
+    
+        const table = document.createElement('table');
+        table.id = 'detailPeriodsTable';
+    
+        // 1. 创建表头
+        const thead = table.createTHead();
+        const headerRow = thead.insertRow();
+        const headers = [
+            "周期", "价格", "买卖量", "持仓","Structure","R",
+            "强度", "成交量", "效应",  
+        ];
+        headers.forEach(text => {
+            const th = document.createElement('th');
+            th.textContent = text;
+            // ⭐ 买卖量 / 持仓 列头加高亮类
+            if (text === "买卖量" || text === "持仓") {
+                th.classList.add('flow-col');
+            }
+            headerRow.appendChild(th);
+        });
+    
+        // 2. 创建表体
+        const tbody = table.createTBody();
+        for (const [timeframe, metrics] of Object.entries(periodsData)) {
+            const row = tbody.insertRow();
+            if (!metrics.valid) { row.classList.add('invalid-row'); }
+            const insertNumericCell = (value, addPercent = false, fieldKey = null) => { // <--- 修改：新增 fieldKey 参数
+                const cell = row.insertCell();
+                const num = parseFloat(value);
+                if (!isNaN(num)) {
+                    // 如果需要加百分号，则加上
+                    cell.textContent = num.toFixed(2) + (addPercent ? '%' : ''); 
+                    cell.classList.add('numeric');
+
+                    // 新增 R 值突出显示逻辑
+                    if (fieldKey === 'R' && Math.abs(num) > 0.5) {
+                        cell.classList.add('r-highlight'); 
+                    }
+                     // ✅ 新增：效应 < 0 时高亮
+                    if (fieldKey === 'fund_effect' && num < 0) {
+                        cell.classList.add('fund-effect-neg');
+                    }
+
+                    if (fieldKey === 'price_pct' || fieldKey === 'nb_oi_pct' || fieldKey === 'doi_pct') {
+                        const absVal = Math.abs(num);
+                        const isPos = num > 0;
+                        let bandClass = null;
+
+                        if (absVal > 0 && absVal <= 10) {
+                            bandClass = isPos ? 'value-band-pos-1' : 'value-band-neg-1';
+                        } else if (absVal > 10 && absVal <= 20) {
+                            bandClass = isPos ? 'value-band-pos-2' : 'value-band-neg-2';
+                        } else if (absVal > 20 && absVal <= 50) {
+                            bandClass = isPos ? 'value-band-pos-3' : 'value-band-neg-3';
+                        } else if (absVal > 50) {
+                            bandClass = isPos ? 'value-band-pos-4' : 'value-band-neg-4';
+                        }
+
+                        if (bandClass) {
+                            cell.classList.add(bandClass);
+                        }
+                    }
+
+                } else {
+                    cell.textContent = value !== null && value !== undefined ? value : '--';
+                }
+            };
+    
+            const tfCell = row.insertCell();
+            tfCell.innerHTML = `<e>${timeframe}</e>`;
+                        
+            insertNumericCell(metrics.price_pct, true, 'price_pct');
+            insertNumericCell(metrics.nb_oi_pct, true, 'nb_oi_pct');
+            insertNumericCell(metrics.doi_pct, true, 'doi_pct');
+
+
+
+            const structureCell = row.insertCell();
+            structureCell.innerHTML = metrics.structure || 'N/A';
+
+            insertNumericCell(metrics.R, false, 'R'); // <--- 修改：新增 'R' 标识符
+
+            insertNumericCell(metrics.strength);
+            insertNumericCell(metrics.volume_strength);
+             insertNumericCell(metrics.fund_effect, false, 'fund_effect');
+
+        }
+        container.appendChild(table);
+    }
+    
+    /**
+     * 渲染主评分表格
+     * @param {array} dataToRender - 评分数据数组
+     */
+    function renderScoreTable(dataToRender) {
+        const activeBtn = document.querySelector('#scoreFilterButtons .filter-btn.active');
+        const filterValue = activeBtn ? activeBtn.getAttribute('data-filter') : 'all';
+
+        let filteredData = dataToRender;
+        // 1️⃣ 先从全部原始数据里算出“全局最新时间戳”
+        let globalLatestTs = null;
+        if (cachedScoreData && cachedScoreData.length > 0) {
+            cachedScoreData.forEach(row => {
+                if (row.ts && row.ts.length > 0) {
+                    // 每个 symbol 自己最新一条的时间（ts[0] 是你后端按时间倒序塞的）
+                    const latestForSymbol = row.ts[0];
+                    if (globalLatestTs === null || latestForSymbol > globalLatestTs) {
+                        globalLatestTs = latestForSymbol;
+                    }
+                }
+            });
+        }
+
+        // 2️⃣ 过滤 + 标记：hasHighScore / latestTs
+        filteredData = filteredData.map(row => {
+            const hasHighScore = row.scores.some(score => Math.abs(score) >= 50);
+            const latestTs = (row.ts && row.ts.length > 0) ? row.ts[0] : null;
+            return {
+                ...row,
+                hasHighScore,
+                latestTs,
+                isLatestRow: (globalLatestTs !== null && latestTs === globalLatestTs)
+            };
+        });
+
+
+
+        if (filterValue === 'bright') {
+            filteredData = filteredData.filter(row => row.hasHighScore === true);
+        } else if (filterValue === 'dim') {
+            filteredData = filteredData.filter(row => row.hasHighScore === false);
+        }
+        
+        let tbody = document.querySelector("#scoreTable tbody");
+        tbody.innerHTML = "";
+
+        if (filteredData.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #a0aec0; border-bottom: none;">无符合筛选条件的合约数据。</td></tr>';
+            return;
+        }
+
+        // 渲染行
+        for (let row of filteredData) {
+            let tr = document.createElement("tr");
+
+            // ① 最近一次评分所在行：自动高亮
+            if (row.isLatestRow) {
+                tr.classList.add('latest-row');
+            }
+
+            // ② 从实时持仓跳过来时的“目标 symbol 高亮”
+            if (row.symbol === symbolToHighlight) {
+                tr.classList.add('score-row-highlight');
+                tr.id = `score-row-${row.symbol}`;
+
+                // 滚动到该行
+                setTimeout(() => {
+                    const element = document.getElementById(`score-row-${row.symbol}`);
+                    if (element) {
+                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 100);
+                // 注意：不要再这里把 symbolToHighlight 置 null，
+                // 让它在自动刷新时也持续高亮，之前闪一下就是因为这个。
+            }
+
+            // --- END: 新增高亮和定位逻辑 ---
+
+            let tdSym = document.createElement("td");
+
+            // 创建链接
+            const link = document.createElement("a");
+            link.href = `https://coinank.com/zh/proChart?exchange=Binance&symbol=${encodeURIComponent(row.symbol)}&productType=SWAP`;
+            link.target = "_blank";              // 新窗口打开
+            link.rel = "noopener noreferrer";    // 安全习惯
+            link.textContent = row.symbol;
+
+            // 简单加点样式：主题色 + 去下划线 + 鼠标手型
+            link.style.color = "var(--accent-blue)";
+            link.style.textDecoration = "none";
+            link.style.cursor = "pointer";
+            link.style.fontWeight = "700";
+
+            tdSym.appendChild(link);
+            tr.appendChild(tdSym);
+
+
+            let tdCnt = document.createElement("td");
+            tdCnt.style.textAlign = 'center';
+            
+            const countBox = document.createElement("span");
+            countBox.className = "count-box";
+            if (!row.hasHighScore) {
+                countBox.classList.add("count-dim"); 
+            }
+            countBox.innerText = row.count;
+            tdCnt.appendChild(countBox);
+
+            tr.appendChild(tdCnt);
+
+            let tdSeq = document.createElement("td");
+            tdSeq.className = "score-seq-cell";
+
+            for (let i = 0; i < row.ts.length; i++) {
+                let ts = row.ts[i];
+                let sc = row.scores[i];
+                let is_in_position = false;
+                let trade_id = null;
+
+                const box = document.createElement("span");
+                box.className = getColorClass(sc); 
+                box.title = formatTimeShort(ts);
+                box.innerText = sc;
+                
+                // 持仓高亮逻辑
+                if (row.position_ranges) {
+                    const currentRange = row.position_ranges.find(range => 
+                        ts >= range.entry_time_ts && (range.exit_time_ts === null || ts <= range.exit_time_ts)
+                    );
+
+                    if (currentRange) {
+                        is_in_position = true;
+                        trade_id = currentRange.trade_id;
+                    }
+                }
+                
+                // 评分点击事件 (绑定侧边栏, 阻止事件冒泡防止立即关闭)
+                box.addEventListener('click', (e) => {
+                    e.stopPropagation(); // 阻止点击事件冒泡到document，防止被“点击空白处关闭”捕获
+                    handleScoreClick(row.symbol, sc, ts, is_in_position, trade_id);
+                });
+
+                tdSeq.appendChild(box);
+            }
+            tr.appendChild(tdSeq);
+            tbody.appendChild(tr);
+        }
+    }
+
+    // 1m持仓数据
+    function renderOi1mTable(rows) {
+        const tbody = document.getElementById('oi1m-table-body');
+        tbody.innerHTML = '';
+
+        if (!rows || rows.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="12" style="text-align:center; color:#a0aec0; border-bottom:none;">最近没有 1m 持仓异动。</td></tr>';
+            return;
+        }
+
+        rows.forEach(row => {
+            const tr = document.createElement('tr');
+
+            // 时间
+            const timeCell = document.createElement('td');
+            timeCell.className = 'oi1m-col-time';
+            const tsMs = (row.ts && row.ts < 10_000_000_000) ? row.ts * 1000 : row.ts;
+            timeCell.textContent = formatTimeShort(tsMs);
+            tr.appendChild(timeCell);
+
+            // SYMBOL
+            const symCell = document.createElement('td');
+            symCell.className = 'oi1m-col-symbol';
+            symCell.textContent = row.symbol || '--';
+            symCell.title = '点击查看该合约 24h 内的 1m 持仓异动';
+            symCell.addEventListener('click', () => {
+                oi1mCurrentSymbol = row.symbol;
+                oi1mCurrentHours = 24;
+
+                const label = document.getElementById('oi1m-filter-label');
+                if (label) {
+                    label.textContent = `${row.symbol}：最近 24 小时的 1m 持仓异动`;
+                }
+
+                const allBtn = document.getElementById('oi1m-reset-btn');
+                if (allBtn) {
+                    allBtn.classList.remove('active');
+                }
+
+                loadOi1mData(oi1mCurrentSymbol, oi1mCurrentHours);
+            });
+            tr.appendChild(symCell);
+
+            // 24h 提醒次数（来自后端 row.alert_count_24h）
+            const cntCell = document.createElement('td');
+            cntCell.className = 'oi1m-col-alert';
+
+            const cnt = (row.alert_count_24h !== undefined && row.alert_count_24h !== null)
+                ? Number(row.alert_count_24h)
+                : 0;
+
+            const cntBox = document.createElement('span');
+            cntBox.className = 'count-box';
+            if (!cnt || cnt <= 0) cntBox.classList.add('count-dim');
+            cntBox.textContent = isNaN(cnt) ? '0' : String(cnt);
+
+            cntCell.appendChild(cntBox);
+            tr.appendChild(cntCell);
+
+            // === 持仓变化（oi_change）===
+            const oiCell = document.createElement('td');
+            oiCell.className = 'oi1m-col-strong';
+            const oiVal = Number(row.oi_change*100);
+
+            if (isNaN(oiVal)) {
+                oiCell.textContent = '--';
+            } else {
+                // 保持原来显示
+                oiCell.textContent = formatPercent(oiVal);
+
+                // 只在满足条件时加红绿
+                if (oiVal > 2) {          // > 2%
+                    oiCell.classList.add('oi1m-pos');
+                } else if (oiVal < -2) {  // < -2%
+                    oiCell.classList.add('oi1m-neg');
+                }
+            }
+            tr.appendChild(oiCell);
+
+
+            // 2️⃣ 1m 涨幅 price_change （>1% 绿，<-1% 红，仅加颜色）
+            const priceCell = document.createElement('td');
+            priceCell.className = 'oi1m-col-strong';
+            const pcVal = Number(row.price_change);
+
+            if (isNaN(pcVal)) {
+                priceCell.textContent = '--';
+            } else {
+                // 保持原来显示
+                priceCell.textContent = formatPercent(pcVal);
+
+                if (pcVal > 1) {             // > 1%
+                    priceCell.classList.add('oi1m-pos');
+                } else if (pcVal < -1) {     // < -1%
+                    priceCell.classList.add('oi1m-neg');
+                }
+            }
+            tr.appendChild(priceCell);
+
+
+            // 3️⃣ 成交量变化 volume_change_base （>100% 绿，<-100% 红，仅加颜色）
+            const volCell = document.createElement('td');
+            volCell.className = 'oi1m-col-strong';
+            const vbVal = Number(row.volume_change_base*100);
+
+            if (isNaN(vbVal)) {
+                volCell.textContent = '--';
+            } else {
+                // 保持原来显示
+                volCell.textContent = formatPercent(vbVal);
+
+                if (vbVal > 100) {             // > 100%
+                    volCell.classList.add('oi1m-pos');
+                } else if (vbVal < -100) {     // < -100%
+                    volCell.classList.add('oi1m-neg');
+                }
+            }
+            tr.appendChild(volCell);
+
+
+            // 4️⃣ 买卖比 buy_ratio （>2 绿，<0.5 红，仅加颜色）
+            const ratioCell = document.createElement('td');
+            ratioCell.className = 'oi1m-col-strong';
+            const brRaw = Number(row.buy_ratio);
+
+            if (isNaN(brRaw) || brRaw <= 0) {
+                ratioCell.textContent = '--';
+            } else {
+                // 保持原来显示，比如 1.23
+                ratioCell.textContent = brRaw.toFixed(2);
+
+                if (brRaw > 2) {             // > 2
+                    ratioCell.classList.add('oi1m-pos');
+                } else if (brRaw < 0.5) {    // < 0.5
+                    ratioCell.classList.add('oi1m-neg');
+                }
+            }
+            tr.appendChild(ratioCell);
+
+
+            // 解读
+            const analysisCell = document.createElement('td');
+            analysisCell.className = 'oi1m-col-text';
+            analysisCell.textContent = row.analysis || '';
+            tr.appendChild(analysisCell);
+
+            // 成交额变化（volume_change_quote）
+            const vcqCell = document.createElement('td');
+            vcqCell.className = 'oi1m-col-weak';
+            const vcqVal = Number(row.volume_change_quote*100);
+            vcqCell.textContent = isNaN(vcqVal)
+                ? '--'
+                : formatPercent(Math.abs(vcqVal), false);
+            tr.appendChild(vcqCell);
+
+            // 成交额
+            const vuCell = document.createElement('td');
+            vuCell.className = 'oi1m-col-weak';
+            vuCell.textContent = formatNumber(row.volume_usdt, 2);
+            tr.appendChild(vuCell);
+
+            // 买入额
+            const buyCell = document.createElement('td');
+            buyCell.className = 'oi1m-col-weak';
+            buyCell.textContent = formatNumber(row.taker_buy_usdt, 2);
+            tr.appendChild(buyCell);
+
+            // 卖出额
+            const sellCell = document.createElement('td');
+            sellCell.className = 'oi1m-col-weak';
+            sellCell.textContent = formatNumber(row.taker_sell_usdt, 2);
+            tr.appendChild(sellCell);
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    // ========================================================
+    // === 4. 数据获取与处理 (Data Fetching & Handlers) =======
+    // ========================================================
+
+
+    /**
+    * 处理实时持仓 SYMBOL 点击事件，切换到评分 Tab 并打开侧边栏。
+    * @param {string} symbol - 合约名称
+    * @param {string} maxAbsScore - 评分表格中显示的最大分数 (仅用于展示)
+    */
+    async function handleSymbolClick(symbol, maxAbsScore) {
+        // 1. 设置需要定位和高亮的合约
+        symbolToHighlight = symbol;
+        
+        // 2. 切换到 'scores' Tab
+        const scoreNavItem = document.querySelector('.tab-nav-item[data-tab="scores"]');
+        if (scoreNavItem) {
+            // 模拟点击 Tab 导航项。这会触发 Tab 切换逻辑，继而调用 loadScoreData()
+            scoreNavItem.click(); 
+        }
+        // 注意：loadScoreData() 将由 Tab 切换逻辑负责调用，我们只需要确保它能拿到 symbolToHighlight 即可。
+        // 如果 Tab 已经激活，我们需要手动调用一次 renderScoreTable
+        if (activeTab === 'scores' && cachedScoreData) {
+            renderScoreTable(cachedScoreData);
+        }
+
+        // 3. 查找该合约的最新评分的时间戳并打开侧边栏
+        const targetRow = cachedScoreData ? cachedScoreData.find(row => row.symbol === symbol) : null;
+        
+        if (targetRow && targetRow.ts && targetRow.ts.length > 0) {
+            // 假设获取最新的评分
+            const latestTs = targetRow.ts[targetRow.ts.length - 1];
+            const latestScore = targetRow.scores[targetRow.scores.length - 1];
+
+            // 调用打开侧边栏的函数 
+            handleScoreClick(symbol, latestScore, latestTs, true, null); 
+        }
+    }
+
+    /**
+     * 获取并加载主评分数据
+     * [ 无模拟数据 ] [ 移除 closeSidebar() ]
+     */
+    async function loadScoreData() {
+        if (activeTab !== 'scores' && cachedScoreData !== null) {
+            renderScoreTable(cachedScoreData);
+            return; 
+        }
+        
+        try {
+            const resp = await fetch("/scores/table");
+            if (!resp.ok) {
+                throw new Error("API responded with status " + resp.status);
+            } else {
+                cachedScoreData = await resp.json();
+            }
+        } catch (err) {
+            console.error("加载评分数据失败:", err);
+            document.querySelector("#scoreTable tbody").innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--negative-color); border-bottom: none;">[ ERROR ] 无法连接到数据源 /scores/table: ${err.message}</td></tr>`;
+            return;
+        }
+        
+        renderScoreTable(cachedScoreData);
+    }
+
+    async function loadOi1mData(symbol = null, hours = null) {
+        // 如果没传，就用当前全局状态
+        if (hours == null) hours = oi1mCurrentHours || 4;
+        if (symbol === undefined) symbol = oi1mCurrentSymbol;
+
+        oi1mCurrentSymbol = symbol;
+        oi1mCurrentHours = hours;
+
+        // 构造接口 URL
+        // 👉 这里假设后端提供 /oi_1m/events?hours=4[&symbol=BTCUSDT]
+        //    如果你后端是别的路由，只改这里就行。
+        let url = `/oi_1m/events?hours=${encodeURIComponent(hours)}`;
+        if (symbol) {
+            url += `&symbol=${encodeURIComponent(symbol)}`;
+        }
+
+        const tbody = document.getElementById('oi1m-table-body');
+        if (tbody) {
+            tbody.innerHTML =
+                '<tr><td colspan="12" style="text-align:center; color:#a0aec0; border-bottom:none;">加载中...</td></tr>';
+        }
+
+        try {
+            const resp = await fetch(url);
+            if (!resp.ok) {
+                throw new Error('status ' + resp.status);
+            }
+            const data = await resp.json();
+            renderOi1mTable(data);
+            lastOi1mFetch = Date.now();
+        } catch (err) {
+            console.error('加载 1m 持仓异动失败:', err);
+            if (tbody) {
+                tbody.innerHTML =
+                    `<tr><td colspan="12" style="text-align:center; color:var(--negative-color); border-bottom:none;">[ ERROR ] 无法连接到数据源 ${url}: ${err.message}</td></tr>`;
+            }
+        }
+    }
+
+    async function oiwatchLoadList() {
+    const resp = await fetch('/oi_watch/list');
+    const data = await resp.json();
+    oiwatchSymbols = data.symbols || [];
+    if (!oiwatchActiveSymbol && oiwatchSymbols.length) {
+        oiwatchActiveSymbol = oiwatchSymbols[0];
+    }
+    renderOiWatchTabs();
+    }
+
+    async function oiwatchAddSymbol() {
+    const input = document.getElementById('oiwatch-symbol-input');
+    const sym = (input.value || '').trim().toUpperCase();
+    if (!sym) return;
+
+    const resp = await fetch('/oi_watch/add', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({symbol: sym})
+    });
+    const data = await resp.json().catch(()=> ({}));
+    if (!resp.ok) {
+        alert(data.detail || `添加失败 HTTP ${resp.status}`);
+        return;
+    }
+    input.value = '';
+    await oiwatchLoadList();
+    await oiwatchLoadSummary();
+    if (oiwatchActiveSymbol) await oiwatchLoadSeries(oiwatchActiveSymbol);
+    }
+
+    async function oiwatchRemoveSymbol(sym) {
+    const resp = await fetch('/oi_watch/remove', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({symbol: sym})
+    });
+    const data = await resp.json().catch(()=> ({}));
+    if (!resp.ok) {
+        alert(data.detail || `删除失败 HTTP ${resp.status}`);
+        return;
+    }
+    if (oiwatchActiveSymbol === sym) oiwatchActiveSymbol = null;
+    await oiwatchLoadList();
+    await oiwatchLoadSummary();
+    if (oiwatchActiveSymbol) await oiwatchLoadSeries(oiwatchActiveSymbol);
+    }
+
+    function renderOiWatchTabs() {
+    const box = document.getElementById('oiwatch-symbol-tabs');
+    if (!box) return;
+    box.innerHTML = '';
+
+    oiwatchSymbols.forEach(sym => {
+        const btn = document.createElement('div');
+        btn.className = 'oiwatch-tab' + (sym === oiwatchActiveSymbol ? ' active' : '');
+        btn.textContent = sym;
+
+        btn.onclick = async () => {
+        oiwatchActiveSymbol = sym;
+        renderOiWatchTabs();
+        await oiwatchLoadSeries(sym);
+        };
+
+        const x = document.createElement('span');
+        x.className = 'oiwatch-remove';
+        x.textContent = '×';
+        x.title = '删除';
+        x.onclick = (e) => {
+        e.stopPropagation();
+        oiwatchRemoveSymbol(sym);
+        };
+
+        btn.appendChild(x);
+        box.appendChild(btn);
+    });
+    }
+
+    async function oiwatchLoadSummary() {
+    const resp = await fetch('/oi_watch/summary');
+    const data = await resp.json();
+    const items = data.items || [];
+
+    const body = document.getElementById('oiwatch-table-body');
+    if (!body) return;
+    body.innerHTML = '';
+
+    items.forEach(it => {
+        const tr = document.createElement('tr');
+
+        const oiChg = (it.oi_change_pct == null) ? null : Number(it.oi_change_pct);
+        const pxChg = (it.price_change_pct_1m == null) ? null : Number(it.price_change_pct_1m);
+
+        const hot = (oiChg != null && Math.abs(oiChg) >= 1) || (pxChg != null && Math.abs(pxChg) >= 1);
+        if (hot) tr.classList.add('oiwatch-hot');
+
+        tr.innerHTML = `
+        <td>${it.symbol || '--'}</td>
+        <td>${it.oi == null ? '--' : it.oi.toLocaleString()}</td>
+        <td>${oiChg == null ? '--' : oiChg.toFixed(2) + '%'}</td>
+        <td>${it.price == null ? '--' : Number(it.price).toFixed(6)}</td>
+        <td>${pxChg == null ? '--' : pxChg.toFixed(2) + '%'}</td>
+        <td>
+            <button style="padding:4px 8px; cursor:pointer; background:rgba(0,212,255,.12); border:1px solid rgba(0,212,255,.25); color:#cbd5f5; border-radius:6px;"
+                    onclick="(async ()=>{ oiwatchActiveSymbol='${it.symbol}'; renderOiWatchTabs(); await oiwatchLoadSeries('${it.symbol}'); })()">
+            查看图表
+            </button>
+        </td>
+        `;
+        body.appendChild(tr);
+    });
+
+    lastOiWatchFetch = Date.now();
+    }
+
+    async function oiwatchLoadSeries(sym) {
+    const resp = await fetch(`/oi_watch/series?symbol=${encodeURIComponent(sym)}&limit=240`);
+    const data = await resp.json();
+    renderOiWatchChart(data.points || []);
+    }
+
+    function renderOiWatchChart(points) {
+    const box = document.getElementById('oiwatch-chart');
+    if (!box) return;
+    box.innerHTML = '';
+
+    if (!points.length) {
+        box.innerHTML = '<div style="opacity:.7;">暂无数据（添加合约后需等待下一分钟采样）</div>';
+        return;
+    }
+
+    const ois = points.map(p => p.oi);
+    const minOi = Math.min(...ois);
+    const maxOi = Math.max(...ois);
+    const span = Math.max(1e-9, maxOi - minOi);
+
+    points.forEach((p, i) => {
+        const h = ((p.oi - minOi) / span) * 180;
+
+        const bar = document.createElement('div');
+        bar.style.width = '6px';
+        bar.style.height = `${Math.max(2, h)}px`;
+
+        const prev = i > 0 ? points[i - 1] : null;
+
+        const utc = new Date(p.ts * 1000).toISOString()
+            .replace('T', ' ')
+            .replace('.000Z', ' UTC');
+
+        const oi = Number(p.oi);
+        const px = Number(p.price);
+
+        // 计算变化
+        let oiDeltaAbs = null, oiDeltaPct = null;
+        let pxDeltaAbs = null, pxDeltaPct = null;
+
+        if (prev) {
+            const prevOi = Number(prev.oi);
+            const prevPx = Number(prev.price);
+
+            oiDeltaAbs = oi - prevOi;
+            if (prevOi !== 0) oiDeltaPct = (oiDeltaAbs / prevOi) * 100;
+
+            pxDeltaAbs = px - prevPx;
+            if (prevPx !== 0) pxDeltaPct = (pxDeltaAbs / prevPx) * 100;
+        }
+
+        // 颜色：±0.05% 才算有效涨跌
+        const THRESH_PCT = 0.05; // 单位：百分比
+        let upDown = 0;          // 1=有效上涨, -1=有效下跌, 0=噪声/无前值
+
+        if (pxDeltaPct != null) {
+            if (pxDeltaPct >= THRESH_PCT) upDown = 1;
+            else if (pxDeltaPct <= -THRESH_PCT) upDown = -1;
+        }
+
+        if (upDown === 1) {
+            bar.style.background = 'rgba(0, 255, 120, 0.60)';
+            bar.style.boxShadow = '0 0 8px rgba(0, 255, 120, 0.25)';
+        } else if (upDown === -1) {
+            bar.style.background = 'rgba(255, 80, 80, 0.65)';
+            bar.style.boxShadow = '0 0 8px rgba(255, 80, 80, 0.25)';
+        } else {
+            bar.style.background = 'rgba(0, 212, 255, 0.55)';
+            bar.style.boxShadow = '0 0 6px rgba(0, 212, 255, 0.25)';
+        }
+
+        const fmtSigned = (x, digits = 2) =>
+            (x == null ? '--' : (x >= 0 ? '+' : '') + x.toFixed(digits));
+
+        const fmtSignedInt = (x) =>
+            (x == null ? '--' : (x >= 0 ? '+' : '') + Math.round(x).toLocaleString());
+
+        bar.title =
+        `UTC: ${utc}
+        OI: ${oi.toLocaleString()} (Δ ${fmtSignedInt(oiDeltaAbs)} / ${fmtSigned(oiDeltaPct, 2)}%)
+        Price: ${px.toFixed(6)} (Δ ${fmtSigned(pxDeltaAbs, 6)} / ${fmtSigned(pxDeltaPct, 2)}%)`;
+
+        box.appendChild(bar);
+        });
+
+
+    }
+
+
+    /**
+    * 获取并加载实时持仓数据
+    */
+    async function loadPositions() {
+        let data = { positions: [], total_upnl: 0, wallet_balance: 0, total_equity: 0 };
+
+        try {
+            const resp = await fetch('/positions/data');
+            if (!resp.ok) {
+                throw new Error("API responded with status " + resp.status);
+            } else {
+                data = await resp.json();
+            }
+        } catch (err) {
+            console.error("加载持仓数据失败:", err);
+            document.getElementById('positions-table-body').innerHTML =
+                `<tr><td colspan="11" style="text-align: center; color: var(--negative-color); border-bottom: none;">[ ERROR ] 无法连接到数据源 /positions/data: ${err.message}</td></tr>`;
+
+            // 卡片显示错误状态
+            const totalUpnlSpan = document.getElementById('total-upnl');
+            const walletSpan = document.getElementById('wallet-balance');
+            const equitySpan = document.getElementById('total-equity');
+
+            if (totalUpnlSpan) {
+                totalUpnlSpan.textContent = "--";
+                totalUpnlSpan.className = "summary-value summary-value-neutral";
+            }
+            if (walletSpan) walletSpan.textContent = "--";
+            if (equitySpan) equitySpan.textContent = "--";
+            return;
+        }
+
+        const tbody = document.getElementById('positions-table-body');
+        const totalUpnlSpan = document.getElementById('total-upnl');
+        const walletSpan = document.getElementById('wallet-balance');
+        const equitySpan = document.getElementById('total-equity');
+
+        tbody.innerHTML = '';
+
+        // === 更新卡片数字 ===
+        const totalUpnl = data.total_upnl || 0;
+        const walletBalance = data.wallet_balance || 0;
+        const totalEquity = data.total_equity || 0;
+
+        if (totalUpnlSpan) {
+            // 重置 class
+            totalUpnlSpan.className = "summary-value summary-value-neutral";
+
+            if (totalUpnl > 0) {
+                totalUpnlSpan.classList.add("pnl-positive", "summary-value-strong");
+            } else if (totalUpnl < 0) {
+                totalUpnlSpan.classList.add("pnl-negative", "summary-value-strong");
+            }
+
+            totalUpnlSpan.textContent = `${totalUpnl.toFixed(2)} USDT`;
+        }
+
+        if (walletSpan) {
+            walletSpan.textContent = `${walletBalance.toFixed(2)} USDT`;
+        }
+
+        if (equitySpan) {
+            equitySpan.textContent = `${totalEquity.toFixed(2)} USDT`;
+        }
+
+        // === 没有持仓 ===
+        if (!data.positions || data.positions.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="11" style="text-align: center; color: #a0aec0; border-bottom: none;">无当前持仓。</td></tr>';
+            return;
+        }
+
+        // === 渲染持仓行 ===
+        data.positions.forEach((p, index) => {
+            const row = tbody.insertRow();
+            const isLong = (p.side || '').toUpperCase() === 'BUY';
+
+            // 1. 序号
+            let cell = row.insertCell();
+            cell.className = 'pos-index-col group-right';
+            cell.textContent = index + 1;
+
+            // 2. SYMBOL（可点击，跳转到“24h 异动评分”并打开侧边栏）
+            const symCell = row.insertCell();
+            symCell.className = 'pos-key-col group-right';
+            symCell.textContent = p.symbol || '--';
+
+            // 👉 加点击 & 鼠标样式
+            symCell.style.cursor = 'pointer';
+            symCell.title = '点击跳转到 24h 异动评分';
+
+            // 调用上面已经定义好的 handleSymbolClick
+            symCell.addEventListener('click', () => {
+                // 后端如果有 max_abs_score 就传；没有也无所谓
+                handleSymbolClick(p.symbol, p.max_abs_score || null);
+            });
+
+            // 3. 方向
+            const sideCell = row.insertCell();
+            sideCell.className = 'pos-key-col';
+            sideCell.textContent = p.side || '--';
+
+            // 多空底色（复用 long-pos / short-pos）
+            if (isLong) {
+                symCell.classList.add('long-pos');
+                sideCell.classList.add('long-pos');
+            } else {
+                symCell.classList.add('short-pos');
+                sideCell.classList.add('short-pos');
+            }
+
+            // 4. 名义价值 (数量 * 开仓价)
+            const notionalCell = row.insertCell();
+            notionalCell.className = 'pos-value-col group-right';
+            const notional = (p.quantity || 0) * (p.entry_price || 0);
+            notionalCell.textContent = notional ? notional.toFixed(2) : '--';
+
+            // 5. 浮动盈亏 (回报率)
+            const upnlCell = row.insertCell();
+            upnlCell.className = 'pos-pnl-col';
+            const upnl = p.upnl || 0;
+            const pct = p.pnl_pct || 0;
+            const pnlClass = upnl >= 0 ? 'pnl-positive' : 'pnl-negative';
+            upnlCell.style.textAlign = 'right';
+            upnlCell.innerHTML =
+                `<span class="${pnlClass}">${upnl.toFixed(2)} (${pct.toFixed(2)}%)</span>`;
+
+            // 6. 持仓时长
+            const durCell = row.insertCell();
+            durCell.className = 'pos-time-col';
+            durCell.textContent = p.duration || '--';
+
+            // 7. 评分历史（score_history 字符串）
+            const scoreCell = row.insertCell();
+            scoreCell.className = 'pos-score-col pos-score-history';
+            scoreCell.textContent = p.score_history || '';
+
+
+
+            // ⭐ 8. 均线结构（字符串）
+            const maStructCell = row.insertCell();
+            maStructCell.className = 'pos-ma-struct-col';
+
+            const structText = p.ma_struct || '';   // ✅ 先定义 structText
+
+            if (!structText) {
+                maStructCell.textContent = '';
+            } else {
+                // 结构格式类似： "close > ma10 (-0.15%) > ma50 (-0.80%) > ma240 (-3.20%)"
+                const parts = structText.split('>');
+
+                parts.forEach((rawPart, idx) => {
+                    const part = rawPart.trim();
+                    const span = document.createElement('span');
+
+                    if (part.toLowerCase().startsWith('close')) {
+                        // ⭐ close 高亮
+                        span.className = 'ma-close-highlight';
+                        span.textContent = part;
+                    } else {
+                        span.textContent = part;
+                    }
+
+                    maStructCell.appendChild(span);
+
+                    // 中间加上 " > "
+                    if (idx < parts.length - 1) {
+                        maStructCell.appendChild(document.createTextNode(' > '));
+                    }
+                });
+                 // ⭐ 8.1 斜率排列（弱化显示）：ma10 +x% > ma50 -y% > ma240 +z% > K +p%
+                if (p.ma_slope_struct) {
+                    const slopeDiv = document.createElement('div');
+                    slopeDiv.className = 'ma-slope-line';
+
+                    const slopeParts = String(p.ma_slope_struct).split('>').map(s => s.trim()).filter(Boolean);
+
+                    slopeParts.forEach((seg, i) => {
+                        // seg 形如： "K +0.07%" 或 "ma240 -0.01%"
+                        const m = seg.match(/^(\S+)\s+([+-]?\d+(?:\.\d+)?%)$/);
+                        const span = document.createElement('span');
+
+                        if (m) {
+                            const name = m[1];
+                            const pct  = m[2];
+
+                            // K 标黄
+                            if (name.toUpperCase() === 'K') {
+                                span.className = 'ma-slope-k';
+                            }
+
+                            span.textContent = `${name} (${pct})`;
+                        } else {
+                            // 兜底：不符合预期格式就原样显示
+                            span.textContent = seg;
+                        }
+
+                        slopeDiv.appendChild(span);
+
+                        if (i < slopeParts.length - 1) {
+                            slopeDiv.appendChild(document.createTextNode(' > '));
+                        }
+                    });
+
+                    maStructCell.appendChild(slopeDiv);
+                }
+
+            }
+
+
+
+            // ⭐ 9. 均线状态（震荡标签）
+            const maStatusCell = row.insertCell();
+            maStatusCell.className = 'pos-ma-col';
+            if (p.ma_status) {
+                const tag = document.createElement('span');
+                tag.className = 'ma-status-tag';
+                tag.textContent = p.ma_status;
+
+                if (p.ma_status === '震荡') {
+                    tag.classList.add('ma-status-zhendang');
+                }
+                maStatusCell.appendChild(tag);
+            } else {
+                maStatusCell.textContent = '';
+            }
+
+            // ⭐ 10. 金叉 / 死叉
+            const maCrossCell = row.insertCell();
+            maCrossCell.className = 'pos-ma-col group-right';
+
+            if (p.ma_cross) {
+                const parts = [];
+                const pairFM = p.ma_cross.pair_fast_mid;
+                const pairFS = p.ma_cross.pair_fast_slow;
+
+                if (p.ma_cross.fast_mid === 'golden') {
+                    parts.push(`${pairFM} 金叉`);
+                } else if (p.ma_cross.fast_mid === 'death') {
+                    parts.push(`${pairFM} 死叉`);
+                }
+
+                if (p.ma_cross.fast_slow === 'golden') {
+                    parts.push(`${pairFS} 金叉`);
+                } else if (p.ma_cross.fast_slow === 'death') {
+                    parts.push(`${pairFS} 死叉`);
+                }
+
+                maCrossCell.textContent = parts.join('，');
+            } else {
+                maCrossCell.textContent = '';
+            }
+
+            // 8. 操作：手动平仓按钮
+            const opCell = row.insertCell();
+            opCell.className = 'pos-op-col';
+
+            const btn = document.createElement('button');
+            btn.className = 'pos-close-btn';
+            btn.textContent = '平仓';
+
+            // 绑定点击事件
+            btn.addEventListener('click', () => {
+                manualClosePosition(p.symbol, btn);
+            });
+
+            opCell.appendChild(btn);
+        });
+    }
+
+    function renderBlacklist(symbols) {
+        const container = document.getElementById('blacklist-items');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        if (!symbols || symbols.length === 0) {
+            container.textContent = '暂无黑名单';
+            return;
+        }
+
+        symbols.forEach(sym => {
+            const chip = document.createElement('span');
+            chip.className = 'blacklist-chip';
+
+            const label = document.createElement('span');
+            label.className = 'blacklist-chip-symbol';
+            label.textContent = sym;
+
+            const close = document.createElement('span');
+            close.className = 'blacklist-chip-remove';
+            close.textContent = '×';
+            close.title = '从黑名单移除';
+            close.addEventListener('click', () => {
+                removeFromBlacklist(sym);
+            });
+
+            chip.appendChild(label);
+            chip.appendChild(close);
+            container.appendChild(chip);
+        });
+    }
+
+    async function loadBlacklist() {
+        try {
+            const resp = await fetch('/blacklist');
+            if (!resp.ok) {
+                throw new Error('status ' + resp.status);
+            }
+            const data = await resp.json();
+            // 这里假设后端返回 { "symbols": ["BTCUSDT", "ETHUSDT", ...] }
+            renderBlacklist(data.symbols || []);
+        } catch (err) {
+            console.error('加载黑名单失败:', err);
+            const container = document.getElementById('blacklist-items');
+            if (container) {
+                container.textContent = '[ ERROR ] 无法加载黑名单';
+            }
+        }
+    }
+
+    async function addToBlacklist() {
+        const input = document.getElementById('blacklist-input');
+        if (!input) return;
+
+        let sym = (input.value || '').trim().toUpperCase();
+        if (!sym) return;
+
+        try {
+            const resp = await fetch('/blacklist/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ symbol: sym })
+            });
+            if (!resp.ok) {
+                throw new Error('status ' + resp.status);
+            }
+            input.value = '';
+            // 成功后重新加载名单
+            loadBlacklist();
+        } catch (err) {
+            console.error('添加黑名单失败:', err);
+            // 这里可以考虑用 alert 或在卡片里显示错误，无所谓
+        }
+    }
+
+    async function removeFromBlacklist(sym) {
+        try {
+            const resp = await fetch('/blacklist/remove', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ symbol: sym })
+            });
+            if (!resp.ok) {
+                throw new Error('status ' + resp.status);
+            }
+            // 刷新名单
+            loadBlacklist();
+        } catch (err) {
+            console.error('移除黑名单失败:', err);
+        }
+    }
+
+
+
+    /**
+    * 获取并加载交易记录数据
+    * [ 无模拟数据 ]
+    */
+    async function loadTrades() {
+        let data = { trades: [], summary: null };
+        try {
+            const resp = await fetch('/trades/data');  // 不再带 limit 参数
+            if (!resp.ok) {
+                throw new Error("API responded with status " + resp.status);
+            } else {
+                data = await resp.json();
+            }
+        } catch (err) {
+            console.error("加载交易记录失败:", err);
+            document.getElementById('trades-table-body').innerHTML =
+                `<tr><td colspan="9" style="text-align: center; color: var(--negative-color); border-bottom: none;">[ ERROR ] 无法连接到数据源 /trades/data: ${err.message}</td></tr>`;
+            const summaryDiv = document.getElementById('tradesSummary');
+            if (summaryDiv) summaryDiv.textContent = '汇总: --';
+            return;
+        }
+
+        const tbody = document.getElementById('trades-table-body');
+        const summaryDiv = document.getElementById('tradesSummary');
+        tbody.innerHTML = '';
+
+        // === 汇总部分 ===
+        if (summaryDiv) {
+            const s = data.summary || {};
+            const winCount = s.win_count || 0;
+            const lossCount = s.loss_count || 0;
+            const winAmount = typeof s.win_amount === 'number' ? s.win_amount.toFixed(2) : '0.00';
+            const lossAmount = typeof s.loss_amount === 'number' ? s.loss_amount.toFixed(2) : '0.00';
+            const totalPnl = typeof s.total_pnl === 'number' ? s.total_pnl.toFixed(2) : '0.00';
+            const totalClass = parseFloat(totalPnl) >= 0 ? 'pnl-positive' : 'pnl-negative';
+
+            summaryDiv.innerHTML =
+                `盈利单: <span class="pnl-positive">${winCount} (${winAmount} USDT)</span>  |  ` +
+                `亏损单: <span class="pnl-negative">${lossCount} (${lossAmount} USDT)</span>  |  ` +
+                `实现收益: <span class="${totalClass}">${totalPnl} USDT</span>`;
+        }
+
+        // === 明细部分 ===
+        if (!data.trades || data.trades.length === 0) {
+            tbody.innerHTML =
+                '<tr><td colspan="9" style="text-align: center; color: #a0aec0; border-bottom: none;">过去 24 小时无已关闭交易记录。</td></tr>';
+            return;
+        }
+
+        data.trades.forEach((t, idx) => {
+            const row = tbody.insertRow();
+
+            // 序号
+            let cell = row.insertCell();
+            cell.className = 'index-col group-right';
+            cell.textContent = idx + 1;
+
+            // 开仓时间（只保留 HH:MM:SS）
+            cell = row.insertCell();
+            cell.className = 'time-col';
+            cell.textContent = timeOnly(t.open_time || t.open_ts);
+
+            // 平仓时间
+            cell = row.insertCell();
+            cell.className = 'time-col';
+            cell.textContent = timeOnly(t.close_time || t.close_ts);
+
+            // 持仓时长
+            cell = row.insertCell();
+            cell.className = 'time-col group-right';
+            cell.textContent = t.duration || t.duration_str || '--';
+
+            // SYMBOL
+            cell = row.insertCell();
+            cell.className = 'key-col';
+            cell.innerHTML = `<b>${t.symbol || '--'}</b>`;
+            const symbolCell = cell;  // 暂存，后面加多空背景
+
+            // 方向
+            cell = row.insertCell();
+            cell.className = 'key-col';
+            cell.textContent = t.side || '--';
+            const sideCell = cell;
+
+            // 根据方向给 SYMBOL 和 方向 加底色
+            const sideUpper = (t.side || '').toUpperCase();
+            if (sideUpper === 'BUY') {
+                symbolCell.classList.add('long-pos');
+                sideCell.classList.add('long-pos');
+            } else if (sideUpper === 'SELL') {
+                symbolCell.classList.add('short-pos');
+                sideCell.classList.add('short-pos');
+            }
+
+            // 状态（不再用颜色，仅文字）
+            cell = row.insertCell();
+            cell.className = 'status-col group-right';
+            cell.textContent = t.status || '--';
+
+            // 盈亏
+            const pnl = t.pnl !== undefined && t.pnl !== null ? parseFloat(t.pnl) : 0;
+            const pnlColorClass = pnl >= 0 ? 'pnl-positive' : 'pnl-negative';
+
+            cell = row.insertCell();
+            cell.className = 'pnl-col group-right';
+            cell.innerHTML = `<span class="${pnlColorClass}">${pnl.toFixed(4)}</span>`;
+
+            // 历史评分 -> 胶囊
+            cell = row.insertCell();
+            cell.className = 'score-col';
+
+            let scoresRaw = t.score_history_text || t.score_history || '';
+            if (Array.isArray(scoresRaw)) {
+                scoresRaw = scoresRaw.join(', ');
+            }
+
+            const arr = String(scoresRaw)
+                .split(',')
+                .map(s => s.trim())
+                .filter(s => s !== '');
+
+            if (arr.length === 0) {
+                cell.textContent = '--';
+            } else {
+                arr.forEach(v => {
+                    const pill = document.createElement('span');
+                    pill.className = 'score-pill';
+                    pill.textContent = v;
+                    cell.appendChild(pill);
+                });
+            }
+        });
+
+
+    }
+
+
+    /**
+     * 处理评分单元格点击事件，打开侧边栏并加载详细数据
+     * [ 无模拟数据 ]
+     */
+    async function handleScoreClick(symbol, score, timestamp, is_in_position, trade_id) {
+        const sidebar = document.getElementById('scoreDetailsSidebar');
+        const title = document.getElementById('sidebarTitle');
+        
+        const detailDecisionMsg = document.getElementById('detailDecisionMsg');
+        const detailAiSummary = document.getElementById('detailAiSummary');
+        const detailPeriodsDataContainer = document.getElementById('detailPeriodsDataTableContainer');
+
+        // 1. 设置侧边栏基本信息和加载状态
+        title.innerHTML = `${symbol}: ${score}      |&nbsp; &nbsp; &nbsp; &nbsp;  (${formatTimeShort(timestamp)} UTC)`;
+        detailDecisionMsg.textContent = "正在加载机器人决策信息...";
+        detailAiSummary.textContent = "正在加载 AI 趋势总结...";
+        detailPeriodsDataContainer.innerHTML = "正在加载多周期原始数据...";
+
+        // 2. 打开侧边栏 
+        sidebar.classList.add('active');
+        
+        // 3. 发起 API 调用获取详细数据
+        try {
+            const resp = await fetch(`/score/details?symbol=${symbol}&timestamp=${timestamp}`); 
+            let data = {};
+            
+            if (!resp.ok) {
+                throw new Error(`API responded with status ${resp.status}`);
+            }
+
+            data = await resp.json();
+            
+            // 4. 填充数据
+            detailDecisionMsg.textContent = data.decision_msg || "无决策信息。";
+            detailAiSummary.textContent = data.ai_summary || "无 AI 总结。";
+            renderPeriodsTable(data.periods); 
+
+        } catch (err) {
+            console.error("加载评分详情失败:", err);
+            const errMsg = `[ ERROR ] 无法连接到 /score/details 接口或数据获取失败。详情: ${err.message}`;
+            detailDecisionMsg.textContent = errMsg;
+            detailAiSummary.textContent = errMsg;
+            detailPeriodsDataContainer.innerHTML = `<pre>${errMsg}</pre>`;
+        }
+    }
+
+    /**
+    * 实时持仓页：手动平仓某个 symbol
+    */
+    async function manualClosePosition(symbol, btn) {
+        if (!symbol) return;
+
+        const confirmMsg = `确定要手动平仓 ${symbol} 吗？\n\n将以市价平掉当前仓位。`;
+        if (!window.confirm(confirmMsg)) {
+            return;
+        }
+
+        // 按钮锁定，避免重复点
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = '执行中...';
+        }
+
+        try {
+            const resp = await fetch('/positions/close', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ symbol })
+            });
+
+            const data = await resp.json().catch(() => ({}));
+
+            if (!resp.ok || data.ok === false) {
+                const msg = data && data.detail ? data.detail : `HTTP ${resp.status}`;
+                alert(`❌ 平仓失败：${msg}`);
+            } else {
+                alert(`✅ 平仓请求已发送：${symbol}\n${data.detail || ''}`);
+
+                // 平仓成功后，刷新一下持仓数据
+                await loadPositions();
+            }
+
+        } catch (err) {
+            console.error('手动平仓异常', err);
+            alert(`❌ 手动平仓异常：${err.message || err}`);
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = '平仓';
+            }
+        }
+    }
+
+    // ========================================================
+    // === 5. 事件监听与核心逻辑 (Event Listeners & Core Logic)
+    // ========================================================
+
+    /**
+     * Tab 切换逻辑
+     */
+    document.querySelectorAll('.tab-nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const tabId = this.getAttribute('data-tab');
+            
+            if (activeTab === tabId) return; 
+
+            activeTab = tabId;
+            closeSidebar(); // 切换 Tab 时关闭侧边栏
+
+            document.querySelectorAll('.tab-nav-item').forEach(nav => nav.classList.remove('active'));
+            this.classList.add('active');
+
+            document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+            const targetPane = document.getElementById(tabId);
+            if (targetPane) targetPane.classList.add('active');
+
+
+            if (tabId === 'scores') {
+                loadScoreData();
+            } else if (tabId === 'oi1m') {
+                // 切换到 1m 页面时，如果没选 symbol，就默认全市场 4h
+                if (!oi1mCurrentSymbol) {
+                    oi1mCurrentHours = 4;
+                    const label = document.getElementById('oi1m-filter-label');
+                    if (label) {
+                        label.textContent = '全市场：最近 4 小时内的 1m 持仓异动';
+                    }
+                }
+                loadOi1mData(oi1mCurrentSymbol, oi1mCurrentHours);
+            } else if (tabId === 'oiwatch') {
+                oiwatchLoadList().then(async () => {
+                    await oiwatchLoadSummary();
+                    if (oiwatchActiveSymbol) await oiwatchLoadSeries(oiwatchActiveSymbol);
+                });
+            } else if (tabId === 'positions') {
+                loadPositions();
+                loadBlacklist();
+            } else if (tabId === 'trades') {
+                loadTrades(); 
+            }
+
+        });
+    });
+
+    /**
+     * 侧边栏关闭事件 (手动点击 'x' 或 点击空白处)
+     */
+    document.getElementById('closeSidebar').onclick = closeSidebar;
+
+    // [关键修复]: 点击空白处关闭侧边栏
+    document.addEventListener('click', function(event) {
+        const sidebar = document.getElementById('scoreDetailsSidebar');
+        // 检查侧边栏是否激活 AND 点击目标是否在侧边栏容器内
+        if (sidebar.classList.contains('active') && !sidebar.contains(event.target)) {
+            closeSidebar();
+        }
+    });
+    
+    /**
+     * 筛选按钮点击事件处理
+     */
+    document.getElementById('scoreFilterButtons').addEventListener('click', function(event) {
+        if (event.target.classList.contains('filter-btn')) {
+            // 1. 更新激活状态
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // 2. 重新渲染表格
+            if (activeTab === 'scores' && cachedScoreData) {
+                renderScoreTable(cachedScoreData);
+            } else {
+                loadScoreData();
+            }
+        }
+    });
+
+    /**
+     * 数据自动刷新定时器 (每 5 秒)
+     */
+    setInterval(() => {
+        if (activeTab === 'scores') {
+            cachedScoreData = null; 
+            // loadScoreData() 不会关闭侧边栏
+            loadScoreData();
+        } else if (activeTab === 'positions') {
+            loadPositions(); 
+        } else if (activeTab === 'oi1m') {
+            // ⭐ 1m 页面：30 秒刷新一次，避免刷得太快
+            const now = Date.now();
+            if (now - lastOi1mFetch >= 40000) { // 30000ms = 30 秒
+                loadOi1mData(oi1mCurrentSymbol, oi1mCurrentHours);
+            }
+        }else if (activeTab === 'oiwatch') {
+            const now = Date.now();
+            if (now - lastOiWatchFetch >= 50000) {
+                oiwatchLoadSummary();
+                if (oiwatchActiveSymbol) oiwatchLoadSeries(oiwatchActiveSymbol);
+            }
+            }
+
+    }, 5000);
+
+
+    // ========================================================
+    // === 6. 视觉效果逻辑 (Visual Effects) ===================
+    // ========================================================
+
+    /**
+     * H2 标题文本解密效果
+     */
+    function decryptText(element, text) {
+        const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{};:,.<>/?|';
+        const totalLength = text.length;
+        let frame = 0;
+        const lockTime = 150; 
+        const updateInterval = 50; 
+        
+        const interval = setInterval(() => {
+            let newText = '';
+            let isComplete = true;
+
+            for (let i = 0; i < totalLength; i++) {
+                const timeSinceStart = frame * updateInterval;
+                const isLocked = timeSinceStart > (i * lockTime);
+
+                if (isLocked) {
+                    newText += text[i];
+                } else {
+                    const char = text[i];
+                    if (char === ' ' || char === '[' || char === ']' || char === '2' || char === '4') {
+                        newText += char;
+                    } else {
+                        newText += charset[Math.floor(Math.random() * charset.length)];
+                    }
+                    isComplete = false;
+                }
+            }
+
+            element.innerText = newText;
+            
+            if (isComplete) {
+                clearInterval(interval);
+                element.style.textShadow = '0 0 10px rgba(0, 212, 255, 0.8), 0 0 20px rgba(0, 212, 255, 0.5)';
+                element.style.opacity = '1';
+            }
+            
+            frame++;
+        }, updateInterval);
+    }
+
+    /**
+     * 启动 H2 标题解密效果的循环
+     */
+    function startDecryptionLoop() {
+        const h2 = document.getElementById('decryption-title');
+        const targetText = "[ TRADE SYSTEM ] 交易机器人监控"; 
+        
+        h2.style.opacity = '0.5';
+        h2.style.textShadow = 'none';
+
+        decryptText(h2, targetText);
+
+        const decryptionTime = (targetText.length * 150) + 500; 
+        const loopDelay = decryptionTime + 5000; 
+
+        setTimeout(() => {
+            startDecryptionLoop();
+        }, loopDelay);
+    }
+
+
+    // ========================================================
+    // === 7. 初始化 (Initialization) =========================
+    // ========================================================
+// 绑定黑名单添加按钮 & 回车
+    window.addEventListener('DOMContentLoaded', () => {
+        const addBtn = document.getElementById('blacklist-add-btn');
+        const input = document.getElementById('blacklist-input');
+
+        if (addBtn) {
+            addBtn.addEventListener('click', addToBlacklist);
+        }
+        if (input) {
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    addToBlacklist();
+                }
+            });
+        }
+        // ⭐ 新增：重置 1m 视图按钮
+        const oiResetBtn = document.getElementById('oi1m-reset-btn');
+        if (oiResetBtn) {
+            oiResetBtn.addEventListener('click', () => {
+                oi1mCurrentSymbol = null;
+                oi1mCurrentHours = 4;
+                const label = document.getElementById('oi1m-filter-label');
+                if (label) {
+                    label.textContent = '全市场：最近 4 小时内的 1m 持仓异动';
+                }
+                if (activeTab === 'oi1m') {
+                    loadOi1mData(null, 4);
+                }
+            });
+        }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+    const addBtn = document.getElementById('oiwatch-add-btn');
+    const input = document.getElementById('oiwatch-symbol-input');
+    if (addBtn) addBtn.addEventListener('click', oiwatchAddSymbol);
+    if (input) {
+        input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') oiwatchAddSymbol();
+        });
+    }
+    });
+
+    window.addEventListener('load', () => {
+        startDecryptionLoop(); 
+        loadScoreData();         
+        updateClock();
+        setInterval(updateClock, 1000);
+    });
+</script>
+</body>
+</html>
