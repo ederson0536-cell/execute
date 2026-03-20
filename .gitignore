@@ -1,0 +1,25 @@
+# Credentials & Secrets
+.credentials/
+credentials/
+*.key
+*.pem
+*.token
+*.secret
+
+# Logs & Cache
+logs/
+*.log
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# OpenClaw internal
+.openclaw/
+
+# Data & Memory (optional)
+data/
+memory/
+
+# OS
+.DS_Store
+Thumbs.db

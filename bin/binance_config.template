@@ -1,0 +1,10 @@
+# 币安 API 配置模板
+# 复制此文件为 .credentials/binance.txt 并填入真实密钥
+
+API_KEY=your_binance_api_key_here
+SECRET_KEY=your_binance_secret_key_here
+
+# 可选配置
+# BINANCE_BASE_URL=https://api.binance.com  # 主网
+# BINANCE_TESTNET=true  # 测试网
+# BINANCE_FUTURES=true  # 合约交易

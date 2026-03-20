@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>合约监控面板</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0d1117;color:#e6edf3;font-family:Microsoft YaHei,sans-serif;height:100vh;overflow:hidden}
+.app{display:grid;grid-template-rows:50px 1fr 150px;gap:8px;padding:8px}
+.header{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:0 16px;display:flex;align-items:center;justify-content:space-between}
+.title{font-size:16px;color:#58a6ff}
+.info{font-size:12px;color:#8b949e}
+.main{ display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
+.col{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:8px;display:flex;flex-direction:column}
+.col-title{font-size:13px;color:#c9d1d9;margin-bottom:8px;border-bottom:1px solid #30363d;padding-bottom:4px}
+.btns{display:flex;gap:4px;margin-bottom:8px}
+.btn{padding:2px 8px;font-size:10px;background:#21262d;color:#8b949e;border:none;border-radius:4px;cursor:pointer}
+.btn:hover{background:#30363d}
+.btn.active{background:#58a6ff;color:#fff}
+.tb{width:100%;border-collapse:collapse;font-size:11px}
+.tb th,.tb td{padding:2px 4px;text-align:left}
+.tb th{color:#8b949e}
+.pos{color:#3fb950}.neg{color:#f85149}
+.pool{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:8px}
+.pool-title{font-size:13px;color:#c9d1d9;margin-bottom:8px}
+.pool-grid{display:flex;flex-wrap:wrap;gap:4px}
+.chip{padding:2px 8px;font-size:10px;background:#21262d;color:#8b949e;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="app">
+    <div class="header">
+        <div class="title">📊 合约监控面板</div>
+        <div class="info"><span id="time">-</span> | <span id="total">0</span>个币</div>
+    </div>
+    <div class="main">
+        <div class="col">
+            <div class="col-title">💰 资金费率</div>
+            <div class="tb" id="funding"></div>
+        </div>
+        <div class="col">
+            <div class="col-title">📈 价格 <span class="btns" id="priceBtns"></span></div>
+            <div class="tb" id="price"></div>
+        </div>
+        <div class="col">
+            <div class="col-title">📊 OI <span class="btns" id="oiBtns"></span></div>
+            <div class="tb" id="oi"></div>
+        </div>
+        <div class="col">
+            <div class="col-title">👥 大户多空比</div>
+            <div class="tb" id="ls"></div>
+        </div>
+    </div>
+    <div class="pool">
+        <div class="pool-title">🎯 交易池</div>
+        <div class="pool-grid" id="pool"></div>
+    </div>
+</div>
+<script>
+var p="15m",P=["15m","60m","240m","1440m"];
+
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;")}
+function num(v){return (Number(v)||0).toFixed(2)}
+
+function tb(id,d,isRate){
+    var h="<table class=tb><tr><th>#</th><th>合约</th><th>"+(isRate?"费率":"%")+"</th></tr>";
+    if(!d||!d.length)h+="<tr><td colspan=3>暂无</td></tr>";
+    else for(var i=0;i<Math.min(d.length,8);i++){
+        var v=isRate?d[i].rate:d[i].change_pct;
+        h+="<tr><td>"+(i+1)+"</td><td>"+esc(d[i].symbol)+"</td><td class="+(v>=0?"pos":"neg")+">"+(v>0?"+":"")+num(v)+"%</td></tr>";
+    }
+    document.getElementById(id).innerHTML=h+"</table>";
+}
+
+function btns(id,sel,fn){
+    document.getElementById(id).innerHTML=P.map(x=>"<button class=btn "+(x==sel?"active":"")+" onclick="+fn+"('"+x+"')>"+x+"</button>").join("");
+}
+
+function load(){
+    fetch("/api?_="+Date.now()).then(r=>r.json()).then(d=>{
+        document.getElementById("time").textContent=d.timestamp||"-";
+        document.getElementById("total").textContent=d.trading_pool?.total||0;
+        
+        tb("funding",d.funding?.positive,true);
+        tb("funding",d.funding?.negative,true);
+        
+        tb("ls",d.ls_ratio?.increase,false);
+        tb("ls",d.ls_ratio?.decrease,false);
+        
+        tb("price",d.price?.[p]?.increase,false);
+        tb("price",d.price?.[p]?.decrease,false);
+        
+        tb("oi",d.oi?.[p]?.increase,false);
+        tb("oi",d.oi?.[p]?.decrease,false);
+        
+        var s=d.trading_pool?.symbols||[];
+        document.getElementById("pool").innerHTML=s.slice(0,50).map(x=>"<span class=chip>"+x.symbol+"</span>").join("");
+    }).catch(e=>console.error(e));
+}
+
+function sp(x){p=x;btns("priceBtns",p,"sp");btns("oiBtns",p,"sp");load();}
+window.sp=sp;
+
+btns("priceBtns",p,"sp");
+btns("oiBtns",p,"sp");
+load();
+setInterval(load,10000);
+</script>
+</body>
+</html>
