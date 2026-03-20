@@ -19,7 +19,6 @@ from datetime import datetime, timezone
 from threading import Lock
 alert_lock = Lock()
 from logging.handlers import RotatingFileHandler
-import re
 
 # 信号发送配置（只发Symbol+Score）
 #SHORT_SIGNAL_URL = "http://127.0.0.1:8001/signal"  # 短线信号接口（沿用你原有）
@@ -160,25 +159,130 @@ def send_telegram_message(text, chat_id=TELEGRAM_CHAT_ID):
 
 
 
-def extract_score(ai_message):
-    """从 AI 消息中提取综合评分（固定格式：- 综合评分（score）：-20）"""
-    # 精准匹配固定格式的正则表达式
-    score_regex = r'- 综合评分（score）：([+-]?\d+(\.\d+)?)'
-    # 执行匹配（忽略大小写，防止 AI 消息大小写变化，如 Score）
-    match = re.search(score_regex, ai_message, re.IGNORECASE)
-    
-    # 调试打印：查看匹配过程（可后续删除）
+def _sign(x, eps=1e-9):
+    if x > eps:
+        return 1
+    if x < -eps:
+        return -1
+    return 0
 
-    print(f"正则匹配结果：{match}")  # 匹配成功会显示 <re.Match object; ...>
-    
-    if match:
-        # 提取分数（group(1) 对应正则中的括号部分，即纯数字）
-        symbol_score = float(match.group(1))
-        print(f"✅ 提取到分数：{symbol_score}")
-        return symbol_score
+
+def local_quant_analysis(symbol, agg_results, period_strength_ratio, nb_disjoint_ratios):
+    """
+    本地量化解读（替代外部 GPT 调用）：
+    - 识别主导周期（资金强度最大）
+    - 计算方向一致性（价格/NB/OI 共振）
+    - 识别资金结构与风险（背离、锁仓、虚假推动）
+    - 输出结构化文本 + score(-100~100)
+    """
+    valid_periods = {k: v for k, v in agg_results.items() if v.get("valid", True)}
+    if not valid_periods:
+        return {
+            "score": 0.0,
+            "summary": "全部周期波动不足阈值，本轮判定为低波动震荡。",
+            "dominant_period": "N/A",
+            "direction": "震荡",
+            "coherence": "弱共振"
+        }
+
+    ordered_periods = [p for p in ["5m", "15m", "30m", "1h", "4h", "8h", "12h", "24h"] if p in valid_periods]
+
+    dominant_period = max(
+        ordered_periods,
+        key=lambda p: abs(period_strength_ratio.get(p, 0.0)) * (1 + abs(valid_periods[p].get("NB_OI_pct", 0.0)))
+    )
+    dom = valid_periods[dominant_period]
+
+    dom_price_sign = _sign(dom.get("price_pct", 0.0))
+    dom_nb_sign = _sign(dom.get("NB_OI_pct", 0.0))
+    dom_doi_sign = _sign(dom.get("ΔOI_percent", 0.0))
+
+    # 趋势方向（优先看主导周期价格+资金）
+    if dom_price_sign == dom_nb_sign and dom_price_sign != 0:
+        direction_sign = dom_price_sign
     else:
-        print(f"❌ 未匹配到分数（格式不符）")
-        return 0.0  # 未匹配到默认返回 0.0
+        direction_sign = _sign(dom.get("NB_OI_pct", 0.0) + dom.get("ΔOI_percent", 0.0))
+
+    direction = "多头" if direction_sign > 0 else ("空头" if direction_sign < 0 else "震荡")
+
+    # 周期协同度：统计主导方向一致的周期占比
+    agree = 0
+    for p in ordered_periods:
+        row = valid_periods[p]
+        ps = _sign(row.get("price_pct", 0.0))
+        ns = _sign(row.get("NB_OI_pct", 0.0))
+        ds = _sign(row.get("ΔOI_percent", 0.0))
+        if direction_sign == 0:
+            continue
+        if ps == direction_sign and (ns == direction_sign or ds == direction_sign):
+            agree += 1
+    coherence_ratio = (agree / len(ordered_periods)) if ordered_periods else 0.0
+    if coherence_ratio >= 0.75:
+        coherence = "强共振"
+    elif coherence_ratio >= 0.45:
+        coherence = "弱共振"
+    else:
+        coherence = "分歧"
+
+    # 风险/异常识别
+    lock_position = abs(dom.get("R", 0.0)) < 0.15 and abs(dom.get("ΔOI_percent", 0.0)) > 1.0
+    divergence = _sign(dom.get("price_pct", 0.0)) != _sign(dom.get("NB_OI_pct", 0.0)) and abs(dom.get("price_pct", 0.0)) > 0.4
+    fake_push = abs(dom.get("price_pct", 0.0)) > 0.8 and dom.get("ΔOI_percent", 0.0) < 0
+
+    # 评分：趋势强度 + 协同度 + 结构质量 - 风险项
+    trend_core = (
+        dom.get("NB_OI_pct", 0.0) * 3.2 +
+        dom.get("ΔOI_percent", 0.0) * 2.2 +
+        dom.get("price_pct", 0.0) * 2.0
+    )
+    structure_bonus = abs(dom.get("R", 0.0)) * 30
+    coherence_bonus = coherence_ratio * 28
+    effect = dom.get("fund_effect", 0.0)
+    effect_bonus = max(-18, min(18, effect * 4))
+    volume_confirm = nb_disjoint_ratios.get(dominant_period, 0.0) * 16
+
+    penalty = 0.0
+    if lock_position:
+        penalty += 22
+    if divergence:
+        penalty += 16
+    if fake_push:
+        penalty += 12
+
+    raw_score = direction_sign * (abs(trend_core) + structure_bonus + coherence_bonus + volume_confirm) + effect_bonus - penalty
+    score = max(-100.0, min(100.0, raw_score))
+
+    structure_type = "共振型" if _sign(dom.get("NB_OI_pct", 0.0)) == _sign(dom.get("ΔOI_percent", 0.0)) else "对冲型"
+    if lock_position:
+        structure_type = "多空双开"
+    elif divergence and _sign(dom.get("price_pct", 0.0)) > 0 and _sign(dom.get("NB_OI_pct", 0.0)) < 0:
+        structure_type = "吸筹背离"
+
+    long_short = "多" if score > 50 else ("空" if score < -50 else "观望")
+    anomaly_tags = []
+    if lock_position:
+        anomaly_tags.append("锁仓")
+    if divergence:
+        anomaly_tags.append("背离")
+    if fake_push:
+        anomaly_tags.append("虚假推动")
+    anomaly_text = "、".join(anomaly_tags) if anomaly_tags else "无"
+
+    summary = (
+        f"📌 趋势方向：{direction} | 主导周期：{dominant_period} | 周期协同度：{coherence}\n"
+        f"💠 资金结构：{structure_type}（R={dom.get('R', 0.0):.2f}，资金效应={dom.get('fund_effect', 0.0):.2f}）\n"
+        f"⚠️ 异常项：{anomaly_text}\n"
+        f"💡 交易建议（自动交易）：{long_short}\n"
+        f"📊 综合评分（score）：{score:.2f}"
+    )
+
+    return {
+        "score": score,
+        "summary": summary,
+        "dominant_period": dominant_period,
+        "direction": direction,
+        "coherence": coherence
+    }
 
 def send_score_signal(url, symbol, score):
     """仅发送币种和评分到指定接口"""
@@ -221,6 +325,7 @@ def safe_api_call(func, *args, retries=3, **kwargs):
             if i == retries - 1:
                 raise e  # 最后一次失败抛出异常
             time.sleep(1)  # 等待1秒后重试
+
 
 # =================== 数据获取 ===================
 # 获取USDT永续合约交易对
@@ -733,138 +838,34 @@ def process_symbol(symbol):
         msg = build_full_period_message( symbol, agg_results, anomaly_reasons, alert_24h_count,  period_strength_ratio=period_strength_ratio,nb_disjoint_ratios=nb_disjoint_ratios)
         logging.info(f"[{symbol}] 生成监控报告")
 
-        # === 构造 AI 输入，仅保留有效周期 ===
+        # === 构造本地量化输入，仅保留有效周期 ===
         valid_agg_results = {k: v for k, v in agg_results.items() if v.get("valid", True)}
         if not valid_agg_results:
-            logging.info(f"{symbol} 所有周期波动<1%，AI跳过分析。")
-            ai_input_msg = "全部周期波动不足1%，无代表性。"
-        else:
-            ai_input_msg = build_full_period_message(symbol, valid_agg_results, anomaly_reasons, alert_24h_count,period_strength_ratio=period_strength_ratio,nb_disjoint_ratios=nb_disjoint_ratios)
+            logging.info(f"{symbol} 所有周期波动<1%，本地量化将降级为低波动判定。")
 
 
 
-# ========== AI 解读整合发送 ==========
+# ========== 本地量化解读整合发送 ==========
         final_msg = msg
         symbol_score = 0.0  # 初始化评分
+        analysis_result = None
+        ai_summary = ""
         try:
-            
-            from openai import OpenAI   
-            client = OpenAI(api_key="")
-
-            ai_prompt = f"""
-你是一名专业的合约趋势分析师，负责基于币种 {symbol} 的多周期结构数据，输出可用于自动交易的趋势评估与最终评分（score）。
-
-====================================================
-【自动交易规则】
-最终评分用于自动交易：
-score > +50 → 长线开多
-score < -50 → 长线开空
-否则 → 观望
-
-评分区间：+100 极强多头；-100 极强空头；0 震荡
-
-====================================================
-【核心理念：资金主导周期】
-趋势由“资金最集中发力的周期”决定，而不是由周期长短决定。
-
-资金主导周期定义： 强度最大，资金进入最汹涌
- 
-你所有判断必须围绕此周期展开。
-
-====================================================
-【你的分析必须依照以下四大维度】
-
-----------------------------------------------------
-① 方向一致性（趋势是否存在）
-- 对比各周期：价格%、NB/OI%、OI% 是否共振
-
-----------------------------------------------------
-② 主导周期趋势判定（趋势方向由强度最大者决定）
-- 主导周期方向（多/空）= 趋势方向
-- 若主导周期与大部分周期同向 → 强趋势
-- 若主导周期与多数周期反向 → 趋势反转的早期信号
-
-----------------------------------------------------
-③ 资金真实性（趋势是否虚假）
-必须识别：
-A. 多空双开（锁仓）：ΔOI%↑ 且 R 极低  
-B. 主动卖出吸筹：NB/OI%↓ + OI%↑ + 价格↑  
-C. 虚假上涨：价格↑ 但 ΔOI↓ 且资金效应弱  
-D. 虚假放量：强度高但资金效应低  
-
-真实趋势条件：
-- 价格方向、NB、ΔOI 同向
-- R 值绝对值大（结构干净）
-- 主导周期强度集中（右侧发力）
-- 资金效应为正（推动有效）
-
-----------------------------------------------------
-④ 异常反转风险
-- 价格% 与 NB/OI% 背离
-- OI% 掉头（大资金撤离）
-- 强度集中在远端区间（非右侧）
-- 主导周期方向突然反转
-
-====================================================
-【输出格式】
-
-📌 趋势方向（核心结论）
-- 当前趋势：多头 / 空头 / 震荡
-- 主导周期：(由模型判断)
-- 周期协同度：强共振 / 弱共振 / 分歧
-
------------------------
-💠 资金结构（是否真实趋势）
-- 结构类型：共振型 / 对冲型 / 多空双开 / 吸筹背离
-- 真实性判断：真实趋势 / 虚假趋势 / 不干净
-- 关键依据：资金效应、NB/OI%、R 值、OI%
------------------------
-⚠️ 异常与反转信号
-- 异常项：无 / 背离 / 锁仓 / 虚假放量 / OI 掉头
-- 主力行为：吸筹 / 洗盘 / 拉升准备 / 主动打压 / 诱多 / 诱空
------------------------
-📈 风险 - 机会评估
-- 当前风险：回撤风险 / 超买风险 / 强力反弹风险 / 主力撤退
-- 当前机会：趋势延续 / 加速段 / 资金共振 / 主导周期强化
------------------------
-💡 交易建议（面向自动交易）
-- 长线单：多 / 空 / 观望
-- 理由：基于趋势方向、主导周期、是否干净、资金结构
------------------------
-📊 综合结论
-- 一句话总结市场状态
-- 综合评分（score）：-100 ~ +100（必须是具体数字）
------------------------
-
-
-====================================================
-以下是 {symbol} 的多周期监控数据（请基于上述结构分析）：
----
-{ai_input_msg}
----
-
-"""
-
-            # 新版 SDK 调用
-            completion = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[{"role": "user", "content": ai_prompt}],
-                temperature=0.4,
-                max_tokens=1000
+            analysis_result = local_quant_analysis(
+                symbol=symbol,
+                agg_results=valid_agg_results if valid_agg_results else agg_results,
+                period_strength_ratio=period_strength_ratio,
+                nb_disjoint_ratios=nb_disjoint_ratios
             )
-
-            ai_summary = completion.choices[0].message.content.strip()
-            final_msg = f"{msg}\n\n🤖 AI解读:\n{ai_summary}"
-
-
-            # 提取评分
-            symbol_score = extract_score(ai_summary)
-            logging.info(f"{symbol} AI评分: {symbol_score:.2f}")
+            symbol_score = float(analysis_result["score"])
+            ai_summary = analysis_result["summary"]
+            final_msg = f"{msg}\n\n🧠 本地量化解读:\n{ai_summary}"
+            logging.info(f"{symbol} 本地量化评分: {symbol_score:.2f}")
 
         except Exception as e:
-            logging.error(f"AI分析失败: {e}")
-            final_msg = f"{msg}\n\n🤖 AI解读: (生成失败)"
-            ai_summary = None
+            logging.error(f"本地量化分析失败: {e}")
+            final_msg = f"{msg}\n\n🧠 本地量化解读: (生成失败)"
+            ai_summary = ""
 
         # ✅ 一次性发送完整消息
         sent_ok = send_telegram_message(final_msg)
@@ -883,7 +884,8 @@ D. 虚假放量：强度高但资金效应低
             "meta": {
                 "alert_count_24h": alert_24h_count,
                 "timestamp": int(latest_5m["oi_latest"]["timestamp"]) + 5 * 60 * 1000,
-                "ai_summary": ai_summary or ""   # ← 加这里
+                "ai_summary": ai_summary or "",
+                "analysis_mode": "local_quant_v1"
             }
         }
 
@@ -938,7 +940,8 @@ D. 虚假放量：强度高但资金效应低
             "R": latest_5m['R'],
             "count": alert_24h_count,
             "score": symbol_score,
-            "full_payload": full_payload   # 👈 新增
+            "full_payload": full_payload,   # 👈 新增
+            "source": "a_scan"
 
         }
         
@@ -976,7 +979,7 @@ def main_loop():
 
             for item in alerted_results:
                 summary_lines.append(
-                    f"🔸 {item['symbol']} | R={item['R']:+.3f} | 报警次数: {item['count']} | 评分: {item['score']:.2f}"
+                    f"🔸 {item['symbol']} | 来源:{item.get('source','a_scan')} | R={item['R']:+.3f} | 报警次数: {item['count']} | 评分: {item['score']:.2f}"
                 )
 
             # 发送汇总消息
