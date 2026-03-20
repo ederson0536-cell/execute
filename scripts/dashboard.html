@@ -10,16 +10,17 @@ body{background:#0d1117;color:#e6edf3;font-family:Microsoft YaHei,sans-serif;hei
 .header{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:0 16px;display:flex;align-items:center;justify-content:space-between}
 .title{font-size:16px;color:#58a6ff}
 .info{font-size:12px;color:#8b949e}
-.main{ display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
+    .main{ display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:8px}
 .col{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:8px;display:flex;flex-direction:column}
 .col-title{font-size:13px;color:#c9d1d9;margin-bottom:8px;border-bottom:1px solid #30363d;padding-bottom:4px}
 .btns{display:flex;gap:4px;margin-bottom:8px}
 .btn{padding:2px 8px;font-size:10px;background:#21262d;color:#8b949e;border:none;border-radius:4px;cursor:pointer}
 .btn:hover{background:#30363d}
 .btn.active{background:#58a6ff;color:#fff}
-.tb{width:100%;border-collapse:collapse;font-size:11px}
-.tb th,.tb td{padding:2px 4px;text-align:left}
-.tb th{color:#8b949e}
+    .tb{width:100%;border-collapse:collapse;font-size:11px}
+    .tb th,.tb td{padding:2px 4px;text-align:left}
+    .tb th{color:#8b949e}
+    .sub{font-size:11px;color:#8b949e;margin:4px 0}
 .pos{color:#3fb950}.neg{color:#f85149}
 .pool{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:8px}
 .pool-title{font-size:13px;color:#c9d1d9;margin-bottom:8px}
@@ -36,19 +37,38 @@ body{background:#0d1117;color:#e6edf3;font-family:Microsoft YaHei,sans-serif;hei
     <div class="main">
         <div class="col">
             <div class="col-title">💰 资金费率</div>
-            <div class="tb" id="funding"></div>
+            <div class="sub">正费率 TOP</div>
+            <div class="tb" id="funding_pos"></div>
+            <div class="sub">负费率 TOP</div>
+            <div class="tb" id="funding_neg"></div>
         </div>
         <div class="col">
             <div class="col-title">📈 价格 <span class="btns" id="priceBtns"></span></div>
-            <div class="tb" id="price"></div>
+            <div class="sub">涨幅 TOP</div>
+            <div class="tb" id="price_up"></div>
+            <div class="sub">跌幅 TOP</div>
+            <div class="tb" id="price_down"></div>
         </div>
         <div class="col">
             <div class="col-title">📊 OI <span class="btns" id="oiBtns"></span></div>
-            <div class="tb" id="oi"></div>
+            <div class="sub">增幅 TOP</div>
+            <div class="tb" id="oi_up"></div>
+            <div class="sub">降幅 TOP</div>
+            <div class="tb" id="oi_down"></div>
         </div>
         <div class="col">
             <div class="col-title">👥 大户多空比</div>
-            <div class="tb" id="ls"></div>
+            <div class="sub">增幅 TOP</div>
+            <div class="tb" id="ls_up"></div>
+            <div class="sub">降幅 TOP</div>
+            <div class="tb" id="ls_down"></div>
+        </div>
+        <div class="col">
+            <div class="col-title">⚡ 1m OI</div>
+            <div class="sub">Hot</div>
+            <div class="tb" id="oi1m_hot"></div>
+            <div class="sub">Long Bias / Short Bias</div>
+            <div class="tb" id="oi1m_bias"></div>
         </div>
     </div>
     <div class="pool">
@@ -65,9 +85,19 @@ function num(v){return (Number(v)||0).toFixed(2)}
 function tb(id,d,isRate){
     var h="<table class=tb><tr><th>#</th><th>合约</th><th>"+(isRate?"费率":"%")+"</th></tr>";
     if(!d||!d.length)h+="<tr><td colspan=3>暂无</td></tr>";
-    else for(var i=0;i<Math.min(d.length,8);i++){
+    else for(var i=0;i<Math.min(d.length,6);i++){
         var v=isRate?d[i].rate:d[i].change_pct;
         h+="<tr><td>"+(i+1)+"</td><td>"+esc(d[i].symbol)+"</td><td class="+(v>=0?"pos":"neg")+">"+(v>0?"+":"")+num(v)+"%</td></tr>";
+    }
+    document.getElementById(id).innerHTML=h+"</table>";
+}
+
+function tb1m(id,d,key){
+    var h="<table class=tb><tr><th>#</th><th>合约</th><th>"+(key||"值")+"</th></tr>";
+    if(!d||!d.length)h+="<tr><td colspan=3>暂无</td></tr>";
+    else for(var i=0;i<Math.min(d.length,6);i++){
+        var v=Number(d[i].strength||0);
+        h+="<tr><td>"+(i+1)+"</td><td>"+esc(d[i].symbol)+"</td><td class="+(v>=0?"pos":"neg")+">"+num(v)+"</td></tr>";
     }
     document.getElementById(id).innerHTML=h+"</table>";
 }
@@ -81,20 +111,25 @@ function load(){
         document.getElementById("time").textContent=d.timestamp||"-";
         document.getElementById("total").textContent=d.trading_pool?.total||0;
         
-        tb("funding",d.funding?.positive,true);
-        tb("funding",d.funding?.negative,true);
+        tb("funding_pos",d.funding?.positive,true);
+        tb("funding_neg",d.funding?.negative,true);
         
-        tb("ls",d.ls_ratio?.increase,false);
-        tb("ls",d.ls_ratio?.decrease,false);
+        tb("ls_up",d.ls_ratio?.increase,false);
+        tb("ls_down",d.ls_ratio?.decrease,false);
         
-        tb("price",d.price?.[p]?.increase,false);
-        tb("price",d.price?.[p]?.decrease,false);
+        tb("price_up",d.price?.[p]?.increase,false);
+        tb("price_down",d.price?.[p]?.decrease,false);
         
-        tb("oi",d.oi?.[p]?.increase,false);
-        tb("oi",d.oi?.[p]?.decrease,false);
+        tb("oi_up",d.oi?.[p]?.increase,false);
+        tb("oi_down",d.oi?.[p]?.decrease,false);
+
+        tb1m("oi1m_hot",d.oi_1m?.hot||[],"strength");
+        var longBias = (d.oi_1m?.long_bias||[]).slice(0,3);
+        var shortBias = (d.oi_1m?.short_bias||[]).slice(0,3);
+        tb1m("oi1m_bias",longBias.concat(shortBias),"strength");
         
         var s=d.trading_pool?.symbols||[];
-        document.getElementById("pool").innerHTML=s.slice(0,50).map(x=>"<span class=chip>"+x.symbol+"</span>").join("");
+        document.getElementById("pool").innerHTML=s.slice(0,60).map(x=>"<span class=chip>"+x.symbol+"("+((x.source_count)||0)+")</span>").join("");
     }).catch(e=>console.error(e));
 }
 

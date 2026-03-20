@@ -9,7 +9,6 @@ import json
 import time
 import os
 import signal
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 
 INTERVAL_MINUTES = 1
@@ -31,39 +30,38 @@ def signal_handler(sig, frame):
     log("收到退出信号，正在停止...")
     running = False
 
-def get_all_usdt_symbols():
-    """获取所有USDT合约"""
-    resp = requests.get("https://fapi.binance.com/fapi/v1/exchangeInfo")
-    symbols = [s['symbol'] for s in resp.json()['symbols'] 
-               if s['status'] == 'TRADING' and s.get('contractType') == 'PERPETUAL' and s['quoteAsset'] == 'USDT']
-    return symbols
-
-def get_funding(symbol):
-    """获取单个币种的资金费率"""
-    try:
-        url = f"https://fapi.binance.com/fapi/v1/premiumIndex?symbol={symbol}"
-        r = requests.get(url, timeout=2)
-        if r.status_code == 200:
-            data = r.json()
-            return {
-                'symbol': data['symbol'],
-                'fundingRate': float(data['lastFundingRate']) * 100
-            }
-    except:
-        pass
-    return None
-
 def fetch_all_funding():
-    """并发获取所有币种资金费率"""
-    symbols = get_all_usdt_symbols()
-    results = []
-    with ThreadPoolExecutor(max_workers=20) as executor:
-        futures = {executor.submit(get_funding, sym): sym for sym in symbols}
-        for future in as_completed(futures):
-            result = future.result()
-            if result:
-                results.append(result)
-    return results
+    """
+    批量获取资金费率（单API调用版）
+    使用 /fapi/v1/premiumIndex 不传 symbol，一次返回全市场数据。
+    """
+    try:
+        r = requests.get("https://fapi.binance.com/fapi/v1/premiumIndex", timeout=8)
+        if r.status_code != 200:
+            return []
+        data = r.json()
+        if not isinstance(data, list):
+            return []
+        results = []
+        for row in data:
+            symbol = row.get("symbol", "")
+            # 这里只保留 USDT 永续主列表（排除无效字段）
+            if not symbol.endswith("USDT"):
+                continue
+            if "lastFundingRate" not in row:
+                continue
+            try:
+                results.append(
+                    {
+                        "symbol": symbol,
+                        "fundingRate": float(row["lastFundingRate"]) * 100,
+                    }
+                )
+            except Exception:
+                continue
+        return results
+    except Exception:
+        return []
 
 def format_message(positive, negative):
     """格式化消息"""

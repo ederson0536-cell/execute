@@ -26,7 +26,6 @@ import argparse
 import requests
 import logging
 from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # === 配置 ===
 BASE_URL = "https://api.binance.com"
@@ -81,30 +80,31 @@ def get_usdt_symbols():
         logging.error(f"获取交易对失败: {e}")
         return []
 
-def get_price(symbol):
-    """获取单个币种价格 (24h ticker)"""
-    try:
-        r = requests.get(f"{BASE_URL}/api/v3/ticker/24hr?symbol={symbol}", timeout=5)
-        if r.status_code == 200:
-            return float(r.json()["lastPrice"])
-    except:
-        pass
-    return None
-
 def fetch_all_prices(symbols):
-    """批量获取所有币种价格"""
-    result = {}
-    with ThreadPoolExecutor(max_workers=30) as ex:
-        futures = {ex.submit(get_price, s): s for s in symbols}
-        for future in as_completed(futures):
-            s = futures[future]
-            try:
-                price = future.result()
-                if price is not None:
-                    result[s] = price
-            except:
+    """
+    批量获取所有币种价格（单API调用版）
+    使用 /api/v3/ticker/24hr 不传 symbol，一次拉全市场，再按 symbols 过滤。
+    """
+    try:
+        allow = set(symbols)
+        r = requests.get(f"{BASE_URL}/api/v3/ticker/24hr", timeout=12)
+        if r.status_code != 200:
+            return {}
+        rows = r.json()
+        if not isinstance(rows, list):
+            return {}
+        result = {}
+        for row in rows:
+            symbol = row.get("symbol", "")
+            if symbol not in allow:
                 continue
-    return result
+            try:
+                result[symbol] = float(row["lastPrice"])
+            except Exception:
+                continue
+        return result
+    except Exception:
+        return {}
 
 def record_price():
     """记录当前价格到数据库"""
