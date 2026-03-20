@@ -1,0 +1,145 @@
+{
+  "timestamp": "2026-03-19T18:52:14.714636",
+  "topOI": [
+    {
+      "rank": 1,
+      "symbol": "BTCUSDT",
+      "volume24h": 15522925105.52,
+      "price": 69624.2,
+      "changePercent": -2.526
+    },
+    {
+      "rank": 2,
+      "symbol": "ETHUSDT",
+      "volume24h": 13916986332.52,
+      "price": 2115.66,
+      "changePercent": -3.489
+    },
+    {
+      "rank": 3,
+      "symbol": "BTCUSDC",
+      "volume24h": 3613413100.5,
+      "price": 69620.4,
+      "changePercent": -2.543
+    },
+    {
+      "rank": 4,
+      "symbol": "XAUUSDT",
+      "volume24h": 3562816635.56,
+      "price": 4612.32,
+      "changePercent": -5.337
+    },
+    {
+      "rank": 5,
+      "symbol": "XAGUSDT",
+      "volume24h": 3474977268.2852,
+      "price": 71.24,
+      "changePercent": -6.717
+    },
+    {
+      "rank": 6,
+      "symbol": "ETHUSDC",
+      "volume24h": 3285397992.21,
+      "price": 2115.72,
+      "changePercent": -3.507
+    },
+    {
+      "rank": 7,
+      "symbol": "ALPACAUSDT",
+      "volume24h": 2911352253.74508,
+      "price": 1.19,
+      "changePercent": 391.228
+    },
+    {
+      "rank": 8,
+      "symbol": "SOLUSDT",
+      "volume24h": 2149714866.7609,
+      "price": 87.74,
+      "changePercent": -2.37
+    },
+    {
+      "rank": 9,
+      "symbol": "XRPUSDT",
+      "volume24h": 851050884.9034,
+      "price": 1.4303,
+      "changePercent": -1.853
+    },
+    {
+      "rank": 10,
+      "symbol": "HYPEUSDT",
+      "volume24h": 640106422.90925,
+      "price": 39.766,
+      "changePercent": -6.9
+    },
+    {
+      "rank": 11,
+      "symbol": "PAXGUSDT",
+      "volume24h": 623399349.4762,
+      "price": 4613.35,
+      "changePercent": -5.048
+    },
+    {
+      "rank": 12,
+      "symbol": "SIRENUSDT",
+      "volume24h": 501583408.43316,
+      "price": 0.80346,
+      "changePercent": -9.333
+    },
+    {
+      "rank": 13,
+      "symbol": "BNXUSDT",
+      "volume24h": 492004952.04499,
+      "price": 2.0,
+      "changePercent": 66.376
+    },
+    {
+      "rank": 14,
+      "symbol": "DOGEUSDT",
+      "volume24h": 483263824.1468,
+      "price": 0.09245,
+      "changePercent": -2.479
+    },
+    {
+      "rank": 15,
+      "symbol": "ZECUSDT",
+      "volume24h": 466609915.23,
+      "price": 232.58,
+      "changePercent": -6.399
+    },
+    {
+      "rank": 16,
+      "symbol": "RIVERUSDT",
+      "volume24h": 423307926.0372,
+      "price": 23.634,
+      "changePercent": -5.073
+    },
+    {
+      "rank": 17,
+      "symbol": "LYNUSDT",
+      "volume24h": 409388112.84135,
+      "price": 0.10093,
+      "changePercent": 40.006
+    },
+    {
+      "rank": 18,
+      "symbol": "ALPHAUSDT",
+      "volume24h": 370575971.69449,
+      "price": 0.02027,
+      "changePercent": 36.406
+    },
+    {
+      "rank": 19,
+      "symbol": "PIPPINUSDT",
+      "volume24h": 355593369.50987,
+      "price": 0.10143,
+      "changePercent": 1.298
+    },
+    {
+      "rank": 20,
+      "symbol": "BNBUSDT",
+      "volume24h": 342192437.339,
+      "price": 636.31,
+      "changePercent": -1.961
+    }
+  ]
+}

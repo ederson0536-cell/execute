@@ -1,0 +1,829 @@
+{
+  "timestamp": "2026-03-18T05:53:00",
+  "data": {
+    "15m": {
+      "gainers": [
+        {
+          "rank": 1,
+          "symbol": "ANKRUSDT",
+          "change": 3.33
+        },
+        {
+          "rank": 2,
+          "symbol": "DEGOUSDT",
+          "change": 3.05
+        },
+        {
+          "rank": 3,
+          "symbol": "AUCTIONUSDT",
+          "change": 2.2
+        },
+        {
+          "rank": 4,
+          "symbol": "SXPUSDT",
+          "change": 1.87
+        },
+        {
+          "rank": 5,
+          "symbol": "AXLUSDT",
+          "change": 1.7
+        },
+        {
+          "rank": 6,
+          "symbol": "TRUUSDT",
+          "change": 1.69
+        },
+        {
+          "rank": 7,
+          "symbol": "ENJUSDT",
+          "change": 1.42
+        },
+        {
+          "rank": 8,
+          "symbol": "XNOUSDT",
+          "change": 1.41
+        },
+        {
+          "rank": 9,
+          "symbol": "BEAMXUSDT",
+          "change": 1.4
+        },
+        {
+          "rank": 10,
+          "symbol": "ASTRUSDT",
+          "change": 1.35
+        },
+        {
+          "rank": 11,
+          "symbol": "NTRNUSDT",
+          "change": 1.27
+        },
+        {
+          "rank": 12,
+          "symbol": "MBOXUSDT",
+          "change": 1.05
+        },
+        {
+          "rank": 13,
+          "symbol": "OGNUSDT",
+          "change": 0.93
+        },
+        {
+          "rank": 14,
+          "symbol": "DENTUSDT",
+          "change": 0.88
+        },
+        {
+          "rank": 15,
+          "symbol": "PSGUSDT",
+          "change": 0.86
+        },
+        {
+          "rank": 16,
+          "symbol": "LSKUSDT",
+          "change": 0.71
+        },
+        {
+          "rank": 17,
+          "symbol": "STOUSDT",
+          "change": 0.64
+        },
+        {
+          "rank": 18,
+          "symbol": "QIUSDT",
+          "change": 0.56
+        },
+        {
+          "rank": 19,
+          "symbol": "CTSIUSDT",
+          "change": 0.53
+        },
+        {
+          "rank": 20,
+          "symbol": "FOGOUSDT",
+          "change": 0.49
+        }
+      ],
+      "losers": [
+        {
+          "rank": 1,
+          "symbol": "BTTCUSDT",
+          "change": -2.78
+        },
+        {
+          "rank": 2,
+          "symbol": "HAEDALUSDT",
+          "change": -2.24
+        },
+        {
+          "rank": 3,
+          "symbol": "ATAUSDT",
+          "change": -1.68
+        },
+        {
+          "rank": 4,
+          "symbol": "WUSDT",
+          "change": -1.57
+        },
+        {
+          "rank": 5,
+          "symbol": "XPLUSDT",
+          "change": -1.43
+        },
+        {
+          "rank": 6,
+          "symbol": "HUMAUSDT",
+          "change": -1.02
+        },
+        {
+          "rank": 7,
+          "symbol": "GLMUSDT",
+          "change": -0.9
+        },
+        {
+          "rank": 8,
+          "symbol": "ENSOUSDT",
+          "change": -0.88
+        },
+        {
+          "rank": 9,
+          "symbol": "ARKMUSDT",
+          "change": -0.83
+        },
+        {
+          "rank": 10,
+          "symbol": "PENGUUSDT",
+          "change": -0.81
+        },
+        {
+          "rank": 11,
+          "symbol": "ROBOUSDT",
+          "change": -0.79
+        },
+        {
+          "rank": 12,
+          "symbol": "PIVXUSDT",
+          "change": -0.74
+        },
+        {
+          "rank": 13,
+          "symbol": "LAZIOUSDT",
+          "change": -0.67
+        },
+        {
+          "rank": 14,
+          "symbol": "PLUMEUSDT",
+          "change": -0.65
+        },
+        {
+          "rank": 15,
+          "symbol": "RLCUSDT",
+          "change": -0.65
+        },
+        {
+          "rank": 16,
+          "symbol": "TURBOUSDT",
+          "change": -0.65
+        },
+        {
+          "rank": 17,
+          "symbol": "BROCCOLI714USDT",
+          "change": -0.64
+        },
+        {
+          "rank": 18,
+          "symbol": "OPNUSDT",
+          "change": -0.64
+        },
+        {
+          "rank": 19,
+          "symbol": "VIRTUALUSDT",
+          "change": -0.62
+        },
+        {
+          "rank": 20,
+          "symbol": "SYNUSDT",
+          "change": -0.61
+        }
+      ]
+    },
+    "1h": {
+      "gainers": [
+        {
+          "rank": 1,
+          "symbol": "ANKRUSDT",
+          "change": 9.58
+        },
+        {
+          "rank": 2,
+          "symbol": "DEGOUSDT",
+          "change": 6.08
+        },
+        {
+          "rank": 3,
+          "symbol": "AUCTIONUSDT",
+          "change": 3.43
+        },
+        {
+          "rank": 4,
+          "symbol": "XNOUSDT",
+          "change": 2.86
+        },
+        {
+          "rank": 5,
+          "symbol": "AXLUSDT",
+          "change": 2.39
+        },
+        {
+          "rank": 6,
+          "symbol": "ZILUSDT",
+          "change": 2.23
+        },
+        {
+          "rank": 7,
+          "symbol": "ASTRUSDT",
+          "change": 2.17
+        },
+        {
+          "rank": 8,
+          "symbol": "GUNUSDT",
+          "change": 1.87
+        },
+        {
+          "rank": 9,
+          "symbol": "BEAMXUSDT",
+          "change": 1.8
+        },
+        {
+          "rank": 10,
+          "symbol": "PHAUSDT",
+          "change": 1.54
+        },
+        {
+          "rank": 11,
+          "symbol": "NXPCUSDT",
+          "change": 1.31
+        },
+        {
+          "rank": 12,
+          "symbol": "NTRNUSDT",
+          "change": 1.27
+        },
+        {
+          "rank": 13,
+          "symbol": "CTSIUSDT",
+          "change": 1.26
+        },
+        {
+          "rank": 14,
+          "symbol": "BELUSDT",
+          "change": 1.16
+        },
+        {
+          "rank": 15,
+          "symbol": "BBUSDT",
+          "change": 1.03
+        },
+        {
+          "rank": 16,
+          "symbol": "RVNUSDT",
+          "change": 1.02
+        },
+        {
+          "rank": 17,
+          "symbol": "COOKIEUSDT",
+          "change": 1.01
+        },
+        {
+          "rank": 18,
+          "symbol": "XVGUSDT",
+          "change": 0.97
+        },
+        {
+          "rank": 19,
+          "symbol": "REDUSDT",
+          "change": 0.96
+        },
+        {
+          "rank": 20,
+          "symbol": "SNXUSDT",
+          "change": 0.92
+        }
+      ],
+      "losers": [
+        {
+          "rank": 1,
+          "symbol": "ROBOUSDT",
+          "change": -7.11
+        },
+        {
+          "rank": 2,
+          "symbol": "SXPUSDT",
+          "change": -3.54
+        },
+        {
+          "rank": 3,
+          "symbol": "BTTCUSDT",
+          "change": -2.78
+        },
+        {
+          "rank": 4,
+          "symbol": "VANRYUSDT",
+          "change": -1.94
+        },
+        {
+          "rank": 5,
+          "symbol": "FETUSDT",
+          "change": -1.92
+        },
+        {
+          "rank": 6,
+          "symbol": "ACXUSDT",
+          "change": -1.86
+        },
+        {
+          "rank": 7,
+          "symbol": "HYPERUSDT",
+          "change": -1.78
+        },
+        {
+          "rank": 8,
+          "symbol": "GLMUSDT",
+          "change": -1.72
+        },
+        {
+          "rank": 9,
+          "symbol": "DEXEUSDT",
+          "change": -1.67
+        },
+        {
+          "rank": 10,
+          "symbol": "XPLUSDT",
+          "change": -1.51
+        },
+        {
+          "rank": 11,
+          "symbol": "PIXELUSDT",
+          "change": -1.47
+        },
+        {
+          "rank": 12,
+          "symbol": "MIRAUSDT",
+          "change": -1.35
+        },
+        {
+          "rank": 13,
+          "symbol": "USUALUSDT",
+          "change": -1.31
+        },
+        {
+          "rank": 14,
+          "symbol": "OPNUSDT",
+          "change": -1.2
+        },
+        {
+          "rank": 15,
+          "symbol": "RAREUSDT",
+          "change": -1.18
+        },
+        {
+          "rank": 16,
+          "symbol": "BABYUSDT",
+          "change": -1.09
+        },
+        {
+          "rank": 17,
+          "symbol": "ANIMEUSDT",
+          "change": -1.08
+        },
+        {
+          "rank": 18,
+          "symbol": "WUSDT",
+          "change": -1.05
+        },
+        {
+          "rank": 19,
+          "symbol": "FUSDT",
+          "change": -1.03
+        },
+        {
+          "rank": 20,
+          "symbol": "CFGUSDT",
+          "change": -0.99
+        }
+      ]
+    },
+    "4h": {
+      "gainers": [
+        {
+          "rank": 1,
+          "symbol": "DEGOUSDT",
+          "change": 7.46
+        },
+        {
+          "rank": 2,
+          "symbol": "ANKRUSDT",
+          "change": 7.24
+        },
+        {
+          "rank": 3,
+          "symbol": "TRUUSDT",
+          "change": 3.45
+        },
+        {
+          "rank": 4,
+          "symbol": "AUCTIONUSDT",
+          "change": 3.23
+        },
+        {
+          "rank": 5,
+          "symbol": "XNOUSDT",
+          "change": 2.65
+        },
+        {
+          "rank": 6,
+          "symbol": "YBUSDT",
+          "change": 2.44
+        },
+        {
+          "rank": 7,
+          "symbol": "ASTRUSDT",
+          "change": 2.26
+        },
+        {
+          "rank": 8,
+          "symbol": "HUMAUSDT",
+          "change": 2.21
+        },
+        {
+          "rank": 9,
+          "symbol": "AXLUSDT",
+          "change": 1.87
+        },
+        {
+          "rank": 10,
+          "symbol": "FLOWUSDT",
+          "change": 1.8
+        },
+        {
+          "rank": 11,
+          "symbol": "CTSIUSDT",
+          "change": 1.69
+        },
+        {
+          "rank": 12,
+          "symbol": "DODOUSDT",
+          "change": 1.67
+        },
+        {
+          "rank": 13,
+          "symbol": "ZILUSDT",
+          "change": 1.55
+        },
+        {
+          "rank": 14,
+          "symbol": "GUNUSDT",
+          "change": 1.47
+        },
+        {
+          "rank": 15,
+          "symbol": "BEAMXUSDT",
+          "change": 1.4
+        },
+        {
+          "rank": 16,
+          "symbol": "SNXUSDT",
+          "change": 1.23
+        },
+        {
+          "rank": 17,
+          "symbol": "PHAUSDT",
+          "change": 1.23
+        },
+        {
+          "rank": 18,
+          "symbol": "RVNUSDT",
+          "change": 1.19
+        },
+        {
+          "rank": 19,
+          "symbol": "REZUSDT",
+          "change": 1.17
+        },
+        {
+          "rank": 20,
+          "symbol": "ASRUSDT",
+          "change": 1.09
+        }
+      ],
+      "losers": [
+        {
+          "rank": 1,
+          "symbol": "ROBOUSDT",
+          "change": -11.87
+        },
+        {
+          "rank": 2,
+          "symbol": "SXPUSDT",
+          "change": -4.39
+        },
+        {
+          "rank": 3,
+          "symbol": "VANRYUSDT",
+          "change": -3.56
+        },
+        {
+          "rank": 4,
+          "symbol": "BONKUSDT",
+          "change": -3.03
+        },
+        {
+          "rank": 5,
+          "symbol": "COSUSDT",
+          "change": -2.84
+        },
+        {
+          "rank": 6,
+          "symbol": "CFGUSDT",
+          "change": -2.79
+        },
+        {
+          "rank": 7,
+          "symbol": "BTTCUSDT",
+          "change": -2.78
+        },
+        {
+          "rank": 8,
+          "symbol": "WUSDT",
+          "change": -2.59
+        },
+        {
+          "rank": 9,
+          "symbol": "XPLUSDT",
+          "change": -2.57
+        },
+        {
+          "rank": 10,
+          "symbol": "ACXUSDT",
+          "change": -2.53
+        },
+        {
+          "rank": 11,
+          "symbol": "HYPERUSDT",
+          "change": -2.45
+        },
+        {
+          "rank": 12,
+          "symbol": "WALUSDT",
+          "change": -2.39
+        },
+        {
+          "rank": 13,
+          "symbol": "THEUSDT",
+          "change": -2.38
+        },
+        {
+          "rank": 14,
+          "symbol": "FETUSDT",
+          "change": -2.38
+        },
+        {
+          "rank": 15,
+          "symbol": "PIXELUSDT",
+          "change": -2.35
+        },
+        {
+          "rank": 16,
+          "symbol": "GLMUSDT",
+          "change": -2.13
+        },
+        {
+          "rank": 17,
+          "symbol": "NEWTUSDT",
+          "change": -1.91
+        },
+        {
+          "rank": 18,
+          "symbol": "ENSOUSDT",
+          "change": -1.74
+        },
+        {
+          "rank": 19,
+          "symbol": "ZKPUSDT",
+          "change": -1.69
+        },
+        {
+          "rank": 20,
+          "symbol": "LINEAUSDT",
+          "change": -1.65
+        }
+      ]
+    },
+    "24h": {
+      "gainers": [
+        {
+          "rank": 1,
+          "symbol": "ANKRUSDT",
+          "change": 44.25
+        },
+        {
+          "rank": 2,
+          "symbol": "VANRYUSDT",
+          "change": 18.77
+        },
+        {
+          "rank": 3,
+          "symbol": "STOUSDT",
+          "change": 14.66
+        },
+        {
+          "rank": 4,
+          "symbol": "POLYXUSDT",
+          "change": 14.02
+        },
+        {
+          "rank": 5,
+          "symbol": "ENJUSDT",
+          "change": 12.42
+        },
+        {
+          "rank": 6,
+          "symbol": "DEXEUSDT",
+          "change": 10.64
+        },
+        {
+          "rank": 7,
+          "symbol": "CHRUSDT",
+          "change": 9.94
+        },
+        {
+          "rank": 8,
+          "symbol": "GUNUSDT",
+          "change": 9.57
+        },
+        {
+          "rank": 9,
+          "symbol": "MBOXUSDT",
+          "change": 9.04
+        },
+        {
+          "rank": 10,
+          "symbol": "STEEMUSDT",
+          "change": 7.88
+        },
+        {
+          "rank": 11,
+          "symbol": "HAEDALUSDT",
+          "change": 7.39
+        },
+        {
+          "rank": 12,
+          "symbol": "RIFUSDT",
+          "change": 7.12
+        },
+        {
+          "rank": 13,
+          "symbol": "TUSDT",
+          "change": 6.41
+        },
+        {
+          "rank": 14,
+          "symbol": "LISTAUSDT",
+          "change": 6.4
+        },
+        {
+          "rank": 15,
+          "symbol": "XNOUSDT",
+          "change": 6.33
+        },
+        {
+          "rank": 16,
+          "symbol": "WUSDT",
+          "change": 6.21
+        },
+        {
+          "rank": 17,
+          "symbol": "PHAUSDT",
+          "change": 6.13
+        },
+        {
+          "rank": 18,
+          "symbol": "GLMUSDT",
+          "change": 6.11
+        },
+        {
+          "rank": 19,
+          "symbol": "RLCUSDT",
+          "change": 6.02
+        },
+        {
+          "rank": 20,
+          "symbol": "INITUSDT",
+          "change": 6.0
+        }
+      ],
+      "losers": [
+        {
+          "rank": 1,
+          "symbol": "ANIMEUSDT",
+          "change": -22.08
+        },
+        {
+          "rank": 2,
+          "symbol": "ROBOUSDT",
+          "change": -21.27
+        },
+        {
+          "rank": 3,
+          "symbol": "FUSDT",
+          "change": -19.75
+        },
+        {
+          "rank": 4,
+          "symbol": "GUSDT",
+          "change": -12.9
+        },
+        {
+          "rank": 5,
+          "symbol": "PIXELUSDT",
+          "change": -11.66
+        },
+        {
+          "rank": 6,
+          "symbol": "PLUMEUSDT",
+          "change": -11.37
+        },
+        {
+          "rank": 7,
+          "symbol": "RVNUSDT",
+          "change": -10.95
+        },
+        {
+          "rank": 8,
+          "symbol": "CUSDT",
+          "change": -10.9
+        },
+        {
+          "rank": 9,
+          "symbol": "CFGUSDT",
+          "change": -10.51
+        },
+        {
+          "rank": 10,
+          "symbol": "COSUSDT",
+          "change": -10.18
+        },
+        {
+          "rank": 11,
+          "symbol": "THEUSDT",
+          "change": -9.77
+        },
+        {
+          "rank": 12,
+          "symbol": "DEGOUSDT",
+          "change": -9.31
+        },
+        {
+          "rank": 13,
+          "symbol": "SXPUSDT",
+          "change": -9.17
+        },
+        {
+          "rank": 14,
+          "symbol": "1000CHEEMSUSDT",
+          "change": -7.91
+        },
+        {
+          "rank": 15,
+          "symbol": "NTRNUSDT",
+          "change": -6.98
+        },
+        {
+          "rank": 16,
+          "symbol": "KITEUSDT",
+          "change": -6.55
+        },
+        {
+          "rank": 17,
+          "symbol": "REZUSDT",
+          "change": -6.23
+        },
+        {
+          "rank": 18,
+          "symbol": "EIGENUSDT",
+          "change": -6.06
+        },
+        {
+          "rank": 19,
+          "symbol": "EDUUSDT",
+          "change": -5.31
+        },
+        {
+          "rank": 20,
+          "symbol": "PARTIUSDT",
+          "change": -5.21
+        }
+      ]
+    }
+  }
+}

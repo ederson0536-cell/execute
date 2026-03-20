@@ -1,0 +1,42 @@
+{
+  "BTCUSDT": {
+    "longAccount": 0.6246,
+    "shortAccount": 0.3754,
+    "longShortRatio": 1.6638
+  },
+  "ETHUSDT": {
+    "longAccount": 0.676,
+    "shortAccount": 0.324,
+    "longShortRatio": 2.0864
+  },
+  "BNBUSDT": {
+    "longAccount": 0.6837,
+    "shortAccount": 0.3163,
+    "longShortRatio": 2.1616
+  },
+  "SOLUSDT": {
+    "longAccount": 0.718,
+    "shortAccount": 0.282,
+    "longShortRatio": 2.5461
+  },
+  "XRPUSDT": {
+    "longAccount": 0.7315,
+    "shortAccount": 0.2685,
+    "longShortRatio": 2.7244
+  },
+  "ADAUSDT": {
+    "longAccount": 0.7,
+    "shortAccount": 0.3,
+    "longShortRatio": 2.3333
+  },
+  "DOGEUSDT": {
+    "longAccount": 0.7178,
+    "shortAccount": 0.2822,
+    "longShortRatio": 2.5436
+  },
+  "AVAXUSDT": {
+    "longAccount": 0.6562,
+    "shortAccount": 0.3438,
+    "longShortRatio": 1.9087
+  }
+}

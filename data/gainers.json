@@ -1,0 +1,327 @@
+{
+  "timestamp": "2026-03-19T18:52:14.405950",
+  "gainers": [
+    {
+      "rank": 1,
+      "symbol": "ALPACAUSDT",
+      "price": 1.19,
+      "changePercent": 391.228,
+      "volume": 11619631791.0,
+      "quoteVolume": 2911352253.74508
+    },
+    {
+      "rank": 2,
+      "symbol": "EDGEUSDT",
+      "price": 0.6289,
+      "changePercent": 82.29,
+      "volume": 143531664.0,
+      "quoteVolume": 87309734.3217
+    },
+    {
+      "rank": 3,
+      "symbol": "BNXUSDT",
+      "price": 2.0,
+      "changePercent": 66.376,
+      "volume": 318403038.1,
+      "quoteVolume": 492004952.04499
+    },
+    {
+      "rank": 4,
+      "symbol": "YALAUSDT",
+      "price": 0.0144086,
+      "changePercent": 50.718,
+      "volume": 5948252464.0,
+      "quoteVolume": 66841744.3618888
+    },
+    {
+      "rank": 5,
+      "symbol": "LYNUSDT",
+      "price": 0.10085,
+      "changePercent": 39.895,
+      "volume": 4930515523.0,
+      "quoteVolume": 409405805.05341
+    },
+    {
+      "rank": 6,
+      "symbol": "ALPHAUSDT",
+      "price": 0.02027,
+      "changePercent": 36.406,
+      "volume": 17014680239.0,
+      "quoteVolume": 370575971.69449
+    },
+    {
+      "rank": 7,
+      "symbol": "TANSSIUSDT",
+      "price": 0.011335,
+      "changePercent": 35.263,
+      "volume": 4020285874.0,
+      "quoteVolume": 28037445.47324
+    },
+    {
+      "rank": 8,
+      "symbol": "EPTUSDT",
+      "price": 0.0016024,
+      "changePercent": 34.542,
+      "volume": 22290040548.0,
+      "quoteVolume": 30649553.1927408
+    },
+    {
+      "rank": 9,
+      "symbol": "UAIUSDT",
+      "price": 0.5327,
+      "changePercent": 30.117,
+      "volume": 112520545.0,
+      "quoteVolume": 55311034.8892
+    },
+    {
+      "rank": 10,
+      "symbol": "XANUSDT",
+      "price": 0.013935,
+      "changePercent": 25.597,
+      "volume": 11859546323.0,
+      "quoteVolume": 160576777.402853
+    },
+    {
+      "rank": 11,
+      "symbol": "AIAUSDT",
+      "price": 0.09915,
+      "changePercent": 25.395,
+      "volume": 384206984.0,
+      "quoteVolume": 39588773.43769
+    },
+    {
+      "rank": 12,
+      "symbol": "NTRNUSDT",
+      "price": 0.00684,
+      "changePercent": 22.143,
+      "volume": 1452855692.0,
+      "quoteVolume": 9097013.58488
+    },
+    {
+      "rank": 13,
+      "symbol": "42USDT",
+      "price": 0.0272447,
+      "changePercent": 20.712,
+      "volume": 1247430100.0,
+      "quoteVolume": 34382770.22146
+    },
+    {
+      "rank": 14,
+      "symbol": "OCEANUSDT",
+      "price": 0.707,
+      "changePercent": 18.943,
+      "volume": 102001641.0,
+      "quoteVolume": 65841451.8651
+    },
+    {
+      "rank": 15,
+      "symbol": "DGBUSDT",
+      "price": 0.01922,
+      "changePercent": 18.862,
+      "volume": 2592148978.0,
+      "quoteVolume": 45674718.93021
+    },
+    {
+      "rank": 16,
+      "symbol": "AGIXUSDT",
+      "price": 0.7009,
+      "changePercent": 18.776,
+      "volume": 176909480.0,
+      "quoteVolume": 113687318.3536
+    },
+    {
+      "rank": 17,
+      "symbol": "ARIAUSDT",
+      "price": 0.19318,
+      "changePercent": 17.506,
+      "volume": 202686490.0,
+      "quoteVolume": 38493287.12498
+    },
+    {
+      "rank": 18,
+      "symbol": "SAHARAUSDT",
+      "price": 0.0271,
+      "changePercent": 14.25,
+      "volume": 5628442861.0,
+      "quoteVolume": 145418016.99648
+    },
+    {
+      "rank": 19,
+      "symbol": "PTBUSDT",
+      "price": 0.001236,
+      "changePercent": 13.917,
+      "volume": 15346274286.0,
+      "quoteVolume": 19594467.989001
+    },
+    {
+      "rank": 20,
+      "symbol": "LINAUSDT",
+      "price": 0.000742,
+      "changePercent": 13.629,
+      "volume": 106308520520.8,
+      "quoteVolume": 86817665.678621
+    }
+  ],
+  "losers": [
+    {
+      "rank": 1,
+      "symbol": "PORT3USDT",
+      "price": 0.01182,
+      "changePercent": -68.311,
+      "volume": 17627582985.0,
+      "quoteVolume": 200374788.21369
+    },
+    {
+      "rank": 2,
+      "symbol": "RVVUSDT",
+      "price": 0.0005075,
+      "changePercent": -61.553,
+      "volume": 25703291310.0,
+      "quoteVolume": 24070289.528804
+    },
+    {
+      "rank": 3,
+      "symbol": "BSWUSDT",
+      "price": 0.0122,
+      "changePercent": -55.164,
+      "volume": 3292234872.0,
+      "quoteVolume": 65917286.29962
+    },
+    {
+      "rank": 4,
+      "symbol": "SKATEUSDT",
+      "price": 0.0051013,
+      "changePercent": -52.59,
+      "volume": 1230291769.0,
+      "quoteVolume": 9813385.7179206
+    },
+    {
+      "rank": 5,
+      "symbol": "NEIROETHUSDT",
+      "price": 0.00863,
+      "changePercent": -47.282,
+      "volume": 6915190481.0,
+      "quoteVolume": 83925618.84424
+    },
+    {
+      "rank": 6,
+      "symbol": "1000WHYUSDT",
+      "price": 3.3e-06,
+      "changePercent": -45.0,
+      "volume": 1060232575850.0,
+      "quoteVolume": 4483740.554032
+    },
+    {
+      "rank": 7,
+      "symbol": "VIDTUSDT",
+      "price": 0.00293,
+      "changePercent": -42.436,
+      "volume": 31815175895.0,
+      "quoteVolume": 116094468.40266
+    },
+    {
+      "rank": 8,
+      "symbol": "TROYUSDT",
+      "price": 0.000187,
+      "changePercent": -41.195,
+      "volume": 219797446170.0,
+      "quoteVolume": 44261336.491637
+    },
+    {
+      "rank": 9,
+      "symbol": "DEGOUSDT",
+      "price": 0.6059,
+      "changePercent": -40.176,
+      "volume": 368067144.3,
+      "quoteVolume": 285699266.16418
+    },
+    {
+      "rank": 10,
+      "symbol": "BAKEUSDT",
+      "price": 0.0249,
+      "changePercent": -34.301,
+      "volume": 765653172.0,
+      "quoteVolume": 24688403.6875
+    },
+    {
+      "rank": 11,
+      "symbol": "AMBUSDT",
+      "price": 0.001188,
+      "changePercent": -34.256,
+      "volume": 34735751444.0,
+      "quoteVolume": 66723120.397096
+    },
+    {
+      "rank": 12,
+      "symbol": "COMMONUSDT",
+      "price": 0.0011143,
+      "changePercent": -31.216,
+      "volume": 7646265314.0,
+      "quoteVolume": 10893940.6051056
+    },
+    {
+      "rank": 13,
+      "symbol": "CHESSUSDT",
+      "price": 0.0185458,
+      "changePercent": -30.748,
+      "volume": 1371125401.0,
+      "quoteVolume": 34803123.04749
+    },
+    {
+      "rank": 14,
+      "symbol": "FLMUSDT",
+      "price": 0.0082,
+      "changePercent": -30.508,
+      "volume": 525308135.0,
+      "quoteVolume": 6048396.4552
+    },
+    {
+      "rank": 15,
+      "symbol": "MEMEFIUSDT",
+      "price": 0.002201,
+      "changePercent": -30.48,
+      "volume": 28358933689.0,
+      "quoteVolume": 86505432.148509
+    },
+    {
+      "rank": 16,
+      "symbol": "KATUSDT",
+      "price": 0.00977,
+      "changePercent": -26.597,
+      "volume": 5153759411.0,
+      "quoteVolume": 54442371.10954
+    },
+    {
+      "rank": 17,
+      "symbol": "DMCUSDT",
+      "price": 0.000698,
+      "changePercent": -26.294,
+      "volume": 4029963313.0,
+      "quoteVolume": 3249038.306719
+    },
+    {
+      "rank": 18,
+      "symbol": "NULSUSDT",
+      "price": 0.0313,
+      "changePercent": -24.213,
+      "volume": 507648838.0,
+      "quoteVolume": 19986545.1954
+    },
+    {
+      "rank": 19,
+      "symbol": "NKNUSDT",
+      "price": 0.00561,
+      "changePercent": -21.975,
+      "volume": 766243445.0,
+      "quoteVolume": 4848895.41413
+    },
+    {
+      "rank": 20,
+      "symbol": "BTRUSDT",
+      "price": 0.10955,
+      "changePercent": -21.588,
+      "volume": 277091673.0,
+      "quoteVolume": 32150544.95267
+    }
+  ]
+}

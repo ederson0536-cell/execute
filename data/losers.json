@@ -1,0 +1,125 @@
+{
+  "timestamp": "2026-03-18T05:32:00",
+  "topLosers": [
+    {
+      "rank": 1,
+      "symbol": "BETAUSDT",
+      "price": 0.00036,
+      "changePercent": -64.0
+    },
+    {
+      "rank": 2,
+      "symbol": "VIBUSDT",
+      "price": 0.00223,
+      "changePercent": -63.262
+    },
+    {
+      "rank": 3,
+      "symbol": "WTCUSDT",
+      "price": 0.0103,
+      "changePercent": -56.54
+    },
+    {
+      "rank": 4,
+      "symbol": "CHESSUSDT",
+      "price": 0.00281,
+      "changePercent": -55.183
+    },
+    {
+      "rank": 5,
+      "symbol": "ACAUSDT",
+      "price": 0.0018,
+      "changePercent": -51.351
+    },
+    {
+      "rank": 6,
+      "symbol": "HARDUSDT",
+      "price": 0.0095,
+      "changePercent": -40.252
+    },
+    {
+      "rank": 7,
+      "symbol": "DFUSDT",
+      "price": 0.00164,
+      "changePercent": -37.879
+    },
+    {
+      "rank": 8,
+      "symbol": "BURGERUSDT",
+      "price": 0.0172,
+      "changePercent": -28.631
+    },
+    {
+      "rank": 9,
+      "symbol": "PROSUSDT",
+      "price": 0.0372,
+      "changePercent": -25.896
+    },
+    {
+      "rank": 10,
+      "symbol": "FIROUSDT",
+      "price": 0.3,
+      "changePercent": -25.0
+    },
+    {
+      "rank": 11,
+      "symbol": "DATAUSDT",
+      "price": 0.00088,
+      "changePercent": -24.786
+    },
+    {
+      "rank": 12,
+      "symbol": "OOKIUSDT",
+      "price": 0.000119,
+      "changePercent": -24.684
+    },
+    {
+      "rank": 13,
+      "symbol": "VITEUSDT",
+      "price": 0.00086,
+      "changePercent": -24.561
+    },
+    {
+      "rank": 14,
+      "symbol": "EPXUSDT",
+      "price": 1.94e-05,
+      "changePercent": -24.514
+    },
+    {
+      "rank": 15,
+      "symbol": "TROYUSDT",
+      "price": 6.9e-05,
+      "changePercent": -23.333
+    },
+    {
+      "rank": 16,
+      "symbol": "CVPUSDT",
+      "price": 0.0339,
+      "changePercent": -23.303
+    },
+    {
+      "rank": 17,
+      "symbol": "WINGUSDT",
+      "price": 0.326,
+      "changePercent": -23.294
+    },
+    {
+      "rank": 18,
+      "symbol": "UFTUSDT",
+      "price": 0.0089,
+      "changePercent": -23.276
+    },
+    {
+      "rank": 19,
+      "symbol": "OAXUSDT",
+      "price": 0.0358,
+      "changePercent": -21.491
+    },
+    {
+      "rank": 20,
+      "symbol": "ROBOUSDT",
+      "price": 0.02893,
+      "changePercent": -21.343
+    }
+  ]
+}
